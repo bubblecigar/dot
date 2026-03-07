@@ -2,16 +2,11 @@
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_1dw2k"]
 [ext_resource type="PackedScene" path="res://scenes/Circle.tscn" id="2_u6f7q"]
+[ext_resource type="PackedScene" path="res://scenes/Background.tscn" id="3_05oug"]
 
 [node name="abc" type="Node2D" unique_id=3931664]
 script = ExtResource("1_1dw2k")
 
-[node name="Background" type="ColorRect" parent="." unique_id=964024764]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(1, 0, 0, 1)
+[node name="Background" parent="." instance=ExtResource("3_05oug")]
 
 [node name="Circle" parent="." instance=ExtResource("2_u6f7q")]
