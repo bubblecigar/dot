@@ -1,6 +1,6 @@
 extends Node2D
 
-@export var color: Color = Color(1, 0, 0, 1)
+@export var color: Color = Color(0.83, 0.83, 0.83, 1)
 
 func _ready() -> void:
 	var viewport := get_viewport()
