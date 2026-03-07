@@ -17,4 +17,6 @@ features=PackedStringArray("4.2")
 
 [rendering]
 
+textures/canvas_textures/default_texture_repeat=1
 renderer/rendering_method.mobile="forward_plus"
+textures/vram_compression/import_etc2_astc=true
