@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_1dw2k"]
 [ext_resource type="PackedScene" path="res://scenes/Circle.tscn" id="2_u6f7q"]
 [ext_resource type="PackedScene" path="res://scenes/Background.tscn" id="3_05oug"]
+[ext_resource type="PackedScene" path="res://scenes/DebugLayer.tscn" id="4_1pt13"]
 
 [node name="abc" type="Node2D" unique_id=3931664]
 script = ExtResource("1_1dw2k")
@@ -10,3 +11,5 @@ script = ExtResource("1_1dw2k")
 [node name="Background" parent="." instance=ExtResource("3_05oug")]
 
 [node name="Circle" parent="." instance=ExtResource("2_u6f7q")]
+
+[node name="DebugLayer" parent="." instance=ExtResource("4_1pt13")]

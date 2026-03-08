@@ -19,6 +19,20 @@ func get_circle_position(default_position: Vector2) -> Vector2:
 		return default_position
 	return circle_position
 
+func get_debug_snapshot() -> Dictionary:
+	var snapshot := {}
+	for property in get_property_list():
+		var usage := int(property.get("usage", 0))
+		if (usage & PROPERTY_USAGE_SCRIPT_VARIABLE) == 0:
+			continue
+
+		var name := String(property.get("name", ""))
+		if name.begins_with("_"):
+			continue
+
+		snapshot[name] = get(name)
+	return snapshot
+
 func save_state() -> void:
 	var config := ConfigFile.new()
 	config.set_value("circle", "x", circle_position.x)
