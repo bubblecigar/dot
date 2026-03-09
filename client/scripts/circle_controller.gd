@@ -5,6 +5,7 @@ extends Node2D
 @export var speed: float = 300.0
 
 var circle_position: Vector2 = Vector2.ZERO
+var _was_moving: bool = false
 
 func _ready() -> void:
 	var viewport := get_viewport()
@@ -24,12 +25,27 @@ func _on_viewport_size_changed() -> void:
 
 func _process(delta: float) -> void:
 	var direction := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-	if direction != Vector2.ZERO:
+	var is_moving := direction != Vector2.ZERO
+	if is_moving and not _was_moving:
+		_notify_server_circle_moved()
+
+	if is_moving:
 		circle_position += direction * speed * delta
 		circle_position = _clamp_to_viewport(circle_position)
 		StateStore.set_circle_position(circle_position)
 		StateStore.save_state()
 		queue_redraw()
+
+	_was_moving = is_moving
+
+func _notify_server_circle_moved() -> void:
+	var peer := multiplayer.multiplayer_peer
+	if peer == null:
+		return
+	if peer.get_connection_status() != MultiplayerPeer.CONNECTION_CONNECTED:
+		return
+
+	StateStore.rpc_id(1, "notify_circle_moved")
 
 func _clamp_to_viewport(pos: Vector2) -> Vector2:
 	var size := get_viewport_rect().size

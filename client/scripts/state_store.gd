@@ -33,6 +33,12 @@ func get_debug_snapshot() -> Dictionary:
 		snapshot[name] = get(name)
 	return snapshot
 
+@rpc("any_peer", "call_remote", "reliable")
+func notify_circle_moved() -> void:
+	if not multiplayer.is_server():
+		return
+	print("hello")
+
 func save_state() -> void:
 	var config := ConfigFile.new()
 	config.set_value("circle", "x", circle_position.x)
