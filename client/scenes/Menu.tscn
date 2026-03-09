@@ -20,7 +20,7 @@ theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 16
 
-[node name="AbilityTree" type="Control" parent="MenuPanel/MenuMargin"]
+[node name="TreeScroll" type="ScrollContainer" parent="MenuPanel/MenuMargin"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -28,9 +28,13 @@ offset_left = 0.0
 offset_top = 0.0
 offset_right = 0.0
 offset_bottom = 0.0
+
+[node name="AbilityTree" type="Control" parent="MenuPanel/MenuMargin/TreeScroll"]
+custom_minimum_size = Vector2(1024, 768)
+layout_mode = 2
 script = ExtResource("1_tree")
 
-[node name="GraphEdges" type="Control" parent="MenuPanel/MenuMargin/AbilityTree"]
+[node name="GraphEdges" type="Control" parent="MenuPanel/MenuMargin/TreeScroll/AbilityTree"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -41,7 +45,7 @@ offset_right = 0.0
 offset_bottom = 0.0
 mouse_filter = 2
 
-[node name="GraphNodes" type="Control" parent="MenuPanel/MenuMargin/AbilityTree"]
+[node name="GraphNodes" type="Control" parent="MenuPanel/MenuMargin/TreeScroll/AbilityTree"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

@@ -27,7 +27,15 @@ func _refresh_ability_tree_menu() -> void:
 	var layout_root := "root"
 	if not tree.has(layout_root):
 		layout_root = _get_fallback_focus(tree)
-	var node_positions := _calculate_node_positions(tree, layout_root)
+
+	var subtree_widths := {}
+	_compute_subtree_width(tree, layout_root, subtree_widths, {})
+	var root_units := float(subtree_widths.get(layout_root, 1))
+	var max_depth := _compute_max_depth(tree, layout_root, {})
+	var canvas_size := _compute_canvas_size(root_units, max_depth)
+	custom_minimum_size = canvas_size
+
+	var node_positions := _calculate_node_positions(tree, layout_root, subtree_widths, canvas_size)
 	_draw_graph_edges(tree, node_positions)
 	_draw_graph_nodes(tree, node_positions)
 
@@ -36,23 +44,35 @@ func _get_fallback_focus(tree: Dictionary) -> String:
 		return String(ability_id_variant)
 	return ""
 
-func _calculate_node_positions(tree: Dictionary, center_id: String) -> Dictionary:
+func _calculate_node_positions(
+	tree: Dictionary,
+	center_id: String,
+	subtree_widths: Dictionary,
+	canvas_size: Vector2
+) -> Dictionary:
 	var positions := {}
 	if center_id == "" or not tree.has(center_id):
 		return positions
 
-	var subtree_widths := {}
-	_compute_subtree_width(tree, center_id, subtree_widths, {})
-
 	var root_units := float(subtree_widths.get(center_id, 1))
 	var x_start := 0.0
 	var tree_pixel_width := root_units * HORIZONTAL_GAP
-	if tree_pixel_width < size.x:
-		x_start = (size.x - tree_pixel_width) * 0.5 / HORIZONTAL_GAP
+	if tree_pixel_width < canvas_size.x:
+		x_start = (canvas_size.x - tree_pixel_width) * 0.5 / HORIZONTAL_GAP
 
 	_assign_tree_positions(tree, center_id, 0, x_start, positions, subtree_widths, {})
 
 	return positions
+
+func _compute_canvas_size(root_units: float, max_depth: int) -> Vector2:
+	var viewport_size := size
+	var parent_control := get_parent()
+	if parent_control is Control:
+		viewport_size = (parent_control as Control).size
+
+	var tree_width := root_units * HORIZONTAL_GAP + HORIZONTAL_GAP
+	var tree_height := TOP_MARGIN * 2.0 + float(max_depth) * VERTICAL_GAP + NODE_DIAMETER
+	return Vector2(maxf(viewport_size.x, tree_width), maxf(viewport_size.y, tree_height))
 
 func _compute_subtree_width(
 	tree: Dictionary,
@@ -86,6 +106,30 @@ func _compute_subtree_width(
 	var width := maxi(total_width, 1)
 	subtree_widths[ability_id] = width
 	return width
+
+func _compute_max_depth(tree: Dictionary, ability_id: String, visited: Dictionary) -> int:
+	if visited.has(ability_id):
+		return 0
+	visited[ability_id] = true
+
+	if not tree.has(ability_id):
+		return 0
+
+	var node_data: Dictionary = tree[ability_id]
+	var child_ids: Array[String] = []
+	for child_variant in node_data.get("children", PackedStringArray()):
+		var child_id := String(child_variant)
+		if tree.has(child_id):
+			child_ids.append(child_id)
+
+	if child_ids.is_empty():
+		return 0
+
+	var max_child_depth := 0
+	for child_id in child_ids:
+		var child_depth := _compute_max_depth(tree, child_id, visited.duplicate())
+		max_child_depth = maxi(max_child_depth, child_depth)
+	return 1 + max_child_depth
 
 func _assign_tree_positions(
 	tree: Dictionary,
