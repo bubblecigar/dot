@@ -6,8 +6,6 @@ const LEVEL_RADIUS_STEP := 130.0
 @onready var graph_edges: Control = $GraphEdges
 @onready var graph_nodes: Control = $GraphNodes
 
-var _focused_ability_id: String = "root"
-
 func _ready() -> void:
 	AbilityStore.ability_tree_changed.connect(_refresh_ability_tree_menu)
 	resized.connect(_refresh_ability_tree_menu)
@@ -24,10 +22,10 @@ func _refresh_ability_tree_menu() -> void:
 		_add_graph_message("Ability tree is empty")
 		return
 
-	if not tree.has(_focused_ability_id):
-		_focused_ability_id = _get_fallback_focus(tree)
-
-	var node_positions := _calculate_node_positions(tree, _focused_ability_id)
+	var layout_root := "root"
+	if not tree.has(layout_root):
+		layout_root = _get_fallback_focus(tree)
+	var node_positions := _calculate_node_positions(tree, layout_root)
 	_draw_graph_edges(tree, node_positions)
 	_draw_graph_nodes(tree, node_positions)
 
@@ -174,5 +172,4 @@ func _add_graph_message(text: String) -> void:
 	graph_nodes.add_child(label)
 
 func _on_ability_node_pressed(ability_id: String) -> void:
-	_focused_ability_id = ability_id
 	AbilityStore.add_random_children(ability_id)
