@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" path="res://client/scenes/Circle.tscn" id="2_u6f7q"]
 [ext_resource type="PackedScene" path="res://client/scenes/Background.tscn" id="3_05oug"]
 [ext_resource type="PackedScene" path="res://client/scenes/DebugLayer.tscn" id="4_1pt13"]
-[ext_resource type="PackedScene" path="res://client/scenes/AbilityTreeMenu.tscn" id="5_gm4s0"]
+[ext_resource type="PackedScene" path="res://client/scenes/Menu.tscn" id="5_03b0k"]
 
 [node name="abc" type="Node2D" unique_id=3931664]
 script = ExtResource("1_1dw2k")
@@ -15,22 +15,4 @@ script = ExtResource("1_1dw2k")
 
 [node name="DebugLayer" parent="." instance=ExtResource("4_1pt13")]
 
-[node name="MenuLayer" type="CanvasLayer" parent="."]
-visible = false
-
-[node name="MenuPanel" type="PanelContainer" parent="MenuLayer"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
-
-[node name="MenuMargin" type="MarginContainer" parent="MenuLayer/MenuPanel"]
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
-
-[node name="AbilityTreeMenu" parent="MenuLayer/MenuPanel/MenuMargin" instance=ExtResource("5_gm4s0")]
+[node name="Menu" parent="." instance=ExtResource("5_03b0k")]

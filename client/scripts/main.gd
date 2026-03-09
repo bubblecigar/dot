@@ -2,7 +2,7 @@ extends Node2D
 
 const NetworkConfig := preload("res://shared/network_config.gd")
 
-@onready var menu_layer: CanvasLayer = $MenuLayer
+@onready var menu_layer: CanvasLayer = $Menu
 
 func _ready() -> void:
 	if OS.is_debug_build():
