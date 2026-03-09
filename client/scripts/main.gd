@@ -1,7 +1,6 @@
 extends Node2D
 
-const DEFAULT_SERVER_HOST := "127.0.0.1"
-const DEFAULT_SERVER_PORT := 7000
+const NetworkConfig := preload("res://shared/network_config.gd")
 
 func _ready() -> void:
 	_connect_to_server()
@@ -11,8 +10,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_tree().quit()
 
 func _connect_to_server() -> void:
-	var host := _get_string_arg("--server-host", DEFAULT_SERVER_HOST)
-	var port := _get_int_arg("--server-port", DEFAULT_SERVER_PORT)
+	var host := _get_string_arg("--server-host", NetworkConfig.get_server_host())
+	var port := _get_int_arg("--server-port", NetworkConfig.get_server_port())
 
 	var peer := ENetMultiplayerPeer.new()
 	var err := peer.create_client(host, port)

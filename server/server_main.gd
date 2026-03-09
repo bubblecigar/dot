@@ -1,11 +1,10 @@
 extends Node
 
-const DEFAULT_SERVER_PORT := 7000
-const DEFAULT_MAX_CLIENTS := 32
+const NetworkConfig := preload("res://shared/network_config.gd")
 
 func _ready() -> void:
-	var port := _get_int_arg("--port", DEFAULT_SERVER_PORT)
-	var max_clients := _get_int_arg("--max-clients", DEFAULT_MAX_CLIENTS)
+	var port := _get_int_arg("--port", NetworkConfig.get_server_port())
+	var max_clients := _get_int_arg("--max-clients", NetworkConfig.get_max_clients())
 
 	var server := preload("res://server/enet_server.gd").new()
 	add_child(server)
