@@ -39,13 +39,7 @@ func _process(delta: float) -> void:
 	_was_moving = is_moving
 
 func _notify_server_circle_moved() -> void:
-	var peer := multiplayer.multiplayer_peer
-	if peer == null:
-		return
-	if peer.get_connection_status() != MultiplayerPeer.CONNECTION_CONNECTED:
-		return
-
-	StateStore.rpc_id(1, "notify_circle_moved")
+	ClientRpc.send_circle_moved()
 
 func _clamp_to_viewport(pos: Vector2) -> Vector2:
 	var size := get_viewport_rect().size
