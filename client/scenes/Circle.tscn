@@ -6,3 +6,6 @@
 script = ExtResource("1_t4pow")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+
+[node name="FloorRay" type="RayCast2D" parent="."]
+enabled = true
