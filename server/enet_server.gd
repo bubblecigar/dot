@@ -2,15 +2,18 @@ extends Node
 
 const DEFAULT_TICK_RATE := 20.0
 const DEFAULT_PLAYER_SPEED := 220.0
+const RANDOM_BROADCAST_INTERVAL := 1.0
 
 var _peer: ENetMultiplayerPeer
 var _players: Dictionary = {}
 var _tick_accumulator: float = 0.0
+var _random_accumulator: float = 0.0
 
 @export var tick_rate: float = DEFAULT_TICK_RATE
 @export var player_speed: float = DEFAULT_PLAYER_SPEED
 
 func start(port: int, max_clients: int) -> int:
+	randomize()
 	_peer = ENetMultiplayerPeer.new()
 	var err := _peer.create_server(port, max_clients)
 	if err != OK:
@@ -32,6 +35,11 @@ func _process(delta: float) -> void:
 	while _tick_accumulator >= tick_step:
 		_simulate(tick_step)
 		_tick_accumulator -= tick_step
+
+	_random_accumulator += delta
+	if _random_accumulator >= RANDOM_BROADCAST_INTERVAL:
+		_random_accumulator = 0.0
+		_broadcast_random_number()
 
 func _simulate(delta: float) -> void:
 	for peer_id in _players.keys():
@@ -55,6 +63,13 @@ func _on_peer_connected(peer_id: int) -> void:
 func _on_peer_disconnected(peer_id: int) -> void:
 	_players.erase(peer_id)
 	print("Peer disconnected: %d" % peer_id)
+
+func _broadcast_random_number() -> void:
+	if _players.is_empty():
+		return
+
+	var value := randi_range(1, 100)
+	ClientRpc.rpc("broadcast_random_number", value)
 
 @rpc("any_peer", "call_local", "unreliable")
 func submit_input(direction: Vector2) -> void:
