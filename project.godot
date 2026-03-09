@@ -11,13 +11,13 @@ config_version=5
 [application]
 
 config/name="Blank2DGames"
-run/main_scene="res://scenes/Main.tscn"
+run/main_scene="res://client/scenes/Main.tscn"
 config/features=PackedStringArray("4.6")
 features=PackedStringArray("4.2")
 
 [autoload]
 
-StateStore="*res://scripts/state_store.gd"
+StateStore="*res://client/scripts/state_store.gd"
 
 [rendering]
 

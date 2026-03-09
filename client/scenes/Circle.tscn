@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cfd5ree0n7q5i"]
 
-[ext_resource type="Script" path="res://scripts/circle_controller.gd" id="1_t4pow"]
+[ext_resource type="Script" path="res://client/scripts/circle_controller.gd" id="1_t4pow"]
 
 [node name="Circle" type="Node2D"]
 script = ExtResource("1_t4pow")
