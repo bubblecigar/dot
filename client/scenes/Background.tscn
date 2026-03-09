@@ -5,3 +5,7 @@
 [node name="Background" type="Node2D"]
 script = ExtResource("1_d8i2w")
 z_index = -100
+
+[node name="Floor" type="StaticBody2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor"]
