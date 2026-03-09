@@ -1,6 +1,6 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://client/scripts/ui/ability_tree_menu.gd" id="1_tree"]
+[ext_resource type="Script" path="res://client/scripts/ui/ability_tree_menu.gd" id="1_menu"]
 
 [node name="Menu" type="CanvasLayer"]
 visible = false
@@ -15,12 +15,12 @@ offset_right = 0.0
 offset_bottom = 0.0
 
 [node name="MenuMargin" type="MarginContainer" parent="MenuPanel"]
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
 
-[node name="TreeScroll" type="ScrollContainer" parent="MenuPanel/MenuMargin"]
+[node name="CardMenu" type="Control" parent="MenuPanel/MenuMargin"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -28,13 +28,9 @@ offset_left = 0.0
 offset_top = 0.0
 offset_right = 0.0
 offset_bottom = 0.0
+script = ExtResource("1_menu")
 
-[node name="AbilityTree" type="Control" parent="MenuPanel/MenuMargin/TreeScroll"]
-layout_mode = 2
-script = ExtResource("1_tree")
-
-[node name="GraphEdges" type="Control" parent="MenuPanel/MenuMargin/TreeScroll/AbilityTree"]
-layout_mode = 1
+[node name="Layout" type="VBoxContainer" parent="MenuPanel/MenuMargin/CardMenu"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -42,14 +38,15 @@ offset_left = 0.0
 offset_top = 0.0
 offset_right = 0.0
 offset_bottom = 0.0
-mouse_filter = 2
+theme_override_constants/separation = 16
 
-[node name="GraphNodes" type="Control" parent="MenuPanel/MenuMargin/TreeScroll/AbilityTree"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
+[node name="InstructionLabel" type="Label" parent="MenuPanel/MenuMargin/CardMenu/Layout"]
+text = "Press U to generate 3 random cards"
+
+[node name="CardsRow" type="HBoxContainer" parent="MenuPanel/MenuMargin/CardMenu/Layout"]
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="SelectedLabel" type="Label" parent="MenuPanel/MenuMargin/CardMenu/Layout"]
+text = "Selected: []"
