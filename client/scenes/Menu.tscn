@@ -30,7 +30,6 @@ offset_right = 0.0
 offset_bottom = 0.0
 
 [node name="AbilityTree" type="Control" parent="MenuPanel/MenuMargin/TreeScroll"]
-custom_minimum_size = Vector2(1024, 768)
 layout_mode = 2
 script = ExtResource("1_tree")
 
