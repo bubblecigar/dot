@@ -72,8 +72,12 @@ func _add_ability_rows(tree: Dictionary, ability_id: String, depth: int, visited
 	var ability_name := String(node_data.get("name", ability_id))
 	var unlocked_prefix := "[x]" if AbilityStore.is_unlocked(ability_id) else "[ ]"
 
-	var line := Label.new()
+	var line := Button.new()
 	line.text = "%s%s %s" % ["  ".repeat(depth), unlocked_prefix, ability_name]
+	line.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	line.disabled = AbilityStore.has_expanded(ability_id)
+	if not line.disabled:
+		line.pressed.connect(_on_ability_node_pressed.bind(ability_id))
 	menu_content.add_child(line)
 
 	var child_ids: Array[String] = []
@@ -85,6 +89,9 @@ func _add_ability_rows(tree: Dictionary, ability_id: String, depth: int, visited
 
 	for child_id in child_ids:
 		_add_ability_rows(tree, child_id, depth + 1, visited.duplicate())
+
+func _on_ability_node_pressed(ability_id: String) -> void:
+	AbilityStore.add_random_children(ability_id)
 
 func _connect_to_server() -> void:
 	var host := _get_string_arg("--server-host", NetworkConfig.get_server_host())
