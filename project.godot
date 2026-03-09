@@ -18,7 +18,7 @@ features=PackedStringArray("4.2")
 [autoload]
 
 ClientRpc="*res://shared/client_rpc.gd"
-StateStore="*res://client/scripts/state_store.gd"
+StateStore="*res://client/scripts/stores/state_store.gd"
 
 [rendering]
 

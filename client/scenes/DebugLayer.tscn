@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://b1mq4oupbs05a"]
 
-[ext_resource type="Script" path="res://client/scripts/debug_layer.gd" id="1_rdihf"]
+[ext_resource type="Script" path="res://client/scripts/debugs/debug_layer.gd" id="1_rdihf"]
 
 [node name="DebugLayer" type="CanvasLayer"]
 script = ExtResource("1_rdihf")
