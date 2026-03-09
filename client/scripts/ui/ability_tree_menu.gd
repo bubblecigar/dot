@@ -1,7 +1,9 @@
 extends Control
 
 const NODE_BUTTON_SIZE := Vector2(180, 36)
-const LEVEL_RADIUS_STEP := 130.0
+const HORIZONTAL_GAP := 220.0
+const VERTICAL_GAP := 110.0
+const TOP_MARGIN := 40.0
 
 @onready var graph_edges: Control = $GraphEdges
 @onready var graph_nodes: Control = $GraphNodes
@@ -39,87 +41,94 @@ func _calculate_node_positions(tree: Dictionary, center_id: String) -> Dictionar
 	if center_id == "" or not tree.has(center_id):
 		return positions
 
-	var depth_map := _get_graph_depth_map(tree, center_id)
-	var center := size * 0.5
+	var subtree_widths := {}
+	_compute_subtree_width(tree, center_id, subtree_widths, {})
 
-	for depth_variant in depth_map.keys():
-		var depth := int(depth_variant)
-		var ids: Array[String] = []
-		for ability_id_variant in depth_map.get(depth, []):
-			ids.append(String(ability_id_variant))
-		ids.sort()
+	var root_units := float(subtree_widths.get(center_id, 1))
+	var x_start := 0.0
+	var tree_pixel_width := root_units * HORIZONTAL_GAP
+	if tree_pixel_width < size.x:
+		x_start = (size.x - tree_pixel_width) * 0.5 / HORIZONTAL_GAP
 
-		if depth == 0:
-			positions[center_id] = center
-			continue
-
-		var count := ids.size()
-		if count == 0:
-			continue
-
-		var radius := LEVEL_RADIUS_STEP * depth
-		for i in range(count):
-			var angle := -PI * 0.5 + (TAU * float(i) / float(count))
-			var point := center + Vector2(cos(angle), sin(angle)) * radius
-			positions[ids[i]] = point
+	_assign_tree_positions(tree, center_id, 0, x_start, positions, subtree_widths, {})
 
 	return positions
 
-func _get_graph_depth_map(tree: Dictionary, center_id: String) -> Dictionary:
-	var adjacency := _build_undirected_adjacency(tree)
-	var visited := {center_id: true}
-	var queue: Array[Dictionary] = [{"id": center_id, "depth": 0}]
-	var depth_map: Dictionary = {0: [center_id]}
+func _compute_subtree_width(
+	tree: Dictionary,
+	ability_id: String,
+	subtree_widths: Dictionary,
+	visited: Dictionary
+) -> int:
+	if visited.has(ability_id):
+		return 1
+	visited[ability_id] = true
 
-	while not queue.is_empty():
-		var current: Dictionary = queue.pop_front()
-		var current_id := String(current["id"])
-		var depth := int(current["depth"])
+	if not tree.has(ability_id):
+		return 1
 
-		var neighbors: Array[String] = []
-		for neighbor_variant in adjacency.get(current_id, []):
-			neighbors.append(String(neighbor_variant))
-		for neighbor in neighbors:
-			if visited.has(neighbor):
-				continue
-			visited[neighbor] = true
-			var next_depth := depth + 1
-			if not depth_map.has(next_depth):
-				depth_map[next_depth] = []
-			(depth_map[next_depth] as Array).append(neighbor)
-			queue.append({"id": neighbor, "depth": next_depth})
+	var node_data: Dictionary = tree[ability_id]
+	var child_ids: Array[String] = []
+	for child_variant in node_data.get("children", PackedStringArray()):
+		var child_id := String(child_variant)
+		if tree.has(child_id):
+			child_ids.append(child_id)
+	child_ids.sort()
 
-	return depth_map
+	if child_ids.is_empty():
+		subtree_widths[ability_id] = 1
+		return 1
 
-func _build_undirected_adjacency(tree: Dictionary) -> Dictionary:
-	var adjacency := {}
-	for ability_id_variant in tree.keys():
-		var ability_id := String(ability_id_variant)
-		adjacency[ability_id] = []
+	var total_width := 0
+	for child_id in child_ids:
+		total_width += _compute_subtree_width(tree, child_id, subtree_widths, visited.duplicate())
 
-	for ability_id_variant in tree.keys():
-		var ability_id := String(ability_id_variant)
-		var node_data: Dictionary = tree[ability_id]
+	var width := maxi(total_width, 1)
+	subtree_widths[ability_id] = width
+	return width
 
-		for child_variant in node_data.get("children", PackedStringArray()):
-			var child_id := String(child_variant)
-			if not adjacency.has(child_id):
-				adjacency[child_id] = []
-			if not (adjacency[ability_id] as Array).has(child_id):
-				(adjacency[ability_id] as Array).append(child_id)
-			if not (adjacency[child_id] as Array).has(ability_id):
-				(adjacency[child_id] as Array).append(ability_id)
+func _assign_tree_positions(
+	tree: Dictionary,
+	ability_id: String,
+	depth: int,
+	x_start_units: float,
+	positions: Dictionary,
+	subtree_widths: Dictionary,
+	visited: Dictionary
+) -> void:
+	if visited.has(ability_id):
+		return
+	visited[ability_id] = true
 
-		for required_variant in node_data.get("requires", PackedStringArray()):
-			var required_id := String(required_variant)
-			if not adjacency.has(required_id):
-				adjacency[required_id] = []
-			if not (adjacency[ability_id] as Array).has(required_id):
-				(adjacency[ability_id] as Array).append(required_id)
-			if not (adjacency[required_id] as Array).has(ability_id):
-				(adjacency[required_id] as Array).append(ability_id)
+	if not tree.has(ability_id):
+		return
 
-	return adjacency
+	var node_width_units := float(subtree_widths.get(ability_id, 1))
+	var x_center_units := x_start_units + node_width_units * 0.5
+	var x := x_center_units * HORIZONTAL_GAP
+	var y := TOP_MARGIN + float(depth) * VERTICAL_GAP
+	positions[ability_id] = Vector2(x, y)
+
+	var node_data: Dictionary = tree[ability_id]
+	var child_ids: Array[String] = []
+	for child_variant in node_data.get("children", PackedStringArray()):
+		var child_id := String(child_variant)
+		if tree.has(child_id):
+			child_ids.append(child_id)
+	child_ids.sort()
+
+	var child_x_start := x_start_units
+	for child_id in child_ids:
+		_assign_tree_positions(
+			tree,
+			child_id,
+			depth + 1,
+			child_x_start,
+			positions,
+			subtree_widths,
+			visited.duplicate()
+		)
+		child_x_start += float(subtree_widths.get(child_id, 1))
 
 func _draw_graph_edges(tree: Dictionary, positions: Dictionary) -> void:
 	for ability_id_variant in tree.keys():
