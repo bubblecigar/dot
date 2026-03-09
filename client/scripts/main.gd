@@ -2,12 +2,21 @@ extends Node2D
 
 const NetworkConfig := preload("res://shared/network_config.gd")
 
+@onready var menu_layer: CanvasLayer = $MenuLayer
+
 func _ready() -> void:
 	_connect_to_server()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		get_tree().quit()
+		return
+
+	if event is InputEventKey:
+		var key_event := event as InputEventKey
+		if key_event.pressed and not key_event.echo and key_event.keycode == KEY_TAB:
+			menu_layer.visible = not menu_layer.visible
+			get_viewport().set_input_as_handled()
 
 func _connect_to_server() -> void:
 	var host := _get_string_arg("--server-host", NetworkConfig.get_server_host())

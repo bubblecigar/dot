@@ -13,3 +13,26 @@ script = ExtResource("1_1dw2k")
 [node name="Circle" parent="." instance=ExtResource("2_u6f7q")]
 
 [node name="DebugLayer" parent="." instance=ExtResource("4_1pt13")]
+
+[node name="MenuLayer" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="MenuPanel" type="PanelContainer" parent="MenuLayer"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -180.0
+offset_top = -120.0
+offset_right = 180.0
+offset_bottom = 120.0
+
+[node name="MenuMargin" type="MarginContainer" parent="MenuLayer/MenuPanel"]
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="MenuContent" type="VBoxContainer" parent="MenuLayer/MenuPanel/MenuMargin"]
+custom_minimum_size = Vector2(320, 200)
