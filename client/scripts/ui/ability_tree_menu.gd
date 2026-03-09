@@ -1,6 +1,6 @@
 extends Control
 
-const NODE_BUTTON_SIZE := Vector2(180, 36)
+const NODE_DIAMETER := 34.0
 const HORIZONTAL_GAP := 220.0
 const VERTICAL_GAP := 110.0
 const TOP_MARGIN := 40.0
@@ -159,20 +159,48 @@ func _draw_graph_nodes(tree: Dictionary, positions: Dictionary) -> void:
 
 		var node_data: Dictionary = tree[ability_id]
 		var ability_name := String(node_data.get("name", ability_id))
-		var unlocked_prefix := "[x]" if AbilityStore.is_unlocked(ability_id) else "[ ]"
+		var is_unlocked := AbilityStore.is_unlocked(ability_id)
+		var is_expanded := AbilityStore.has_expanded(ability_id)
 
 		var button := Button.new()
-		button.text = "%s %s" % [unlocked_prefix, ability_name]
-		button.custom_minimum_size = NODE_BUTTON_SIZE
-		button.size = NODE_BUTTON_SIZE
-		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		button.disabled = AbilityStore.has_expanded(ability_id)
-		button.position = (positions[ability_id] as Vector2) - (NODE_BUTTON_SIZE * 0.5)
+		button.text = ""
+		button.tooltip_text = ability_name
+		button.custom_minimum_size = Vector2(NODE_DIAMETER, NODE_DIAMETER)
+		button.size = Vector2(NODE_DIAMETER, NODE_DIAMETER)
+		button.disabled = is_expanded
+		button.position = (positions[ability_id] as Vector2) - Vector2(NODE_DIAMETER * 0.5, NODE_DIAMETER * 0.5)
+		button.set(
+			"theme_override_styles/normal",
+			_make_circle_style(Color(0.18, 0.78, 0.40) if is_unlocked else Color(0.34, 0.36, 0.40))
+		)
+		button.set(
+			"theme_override_styles/hover",
+			_make_circle_style(Color(0.25, 0.86, 0.50) if is_unlocked else Color(0.44, 0.47, 0.53))
+		)
+		button.set(
+			"theme_override_styles/pressed",
+			_make_circle_style(Color(0.12, 0.62, 0.30) if is_unlocked else Color(0.24, 0.26, 0.30))
+		)
+		button.set("theme_override_styles/disabled", _make_circle_style(Color(0.14, 0.15, 0.17)))
 
-		if not button.disabled:
+		if not is_expanded:
 			button.pressed.connect(_on_ability_node_pressed.bind(ability_id))
 
 		graph_nodes.add_child(button)
+
+func _make_circle_style(fill_color: Color) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = fill_color
+	style.corner_radius_top_left = int(NODE_DIAMETER * 0.5)
+	style.corner_radius_top_right = int(NODE_DIAMETER * 0.5)
+	style.corner_radius_bottom_right = int(NODE_DIAMETER * 0.5)
+	style.corner_radius_bottom_left = int(NODE_DIAMETER * 0.5)
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	style.border_color = Color(0.95, 0.95, 0.95, 0.9)
+	return style
 
 func _add_graph_message(text: String) -> void:
 	var label := Label.new()
