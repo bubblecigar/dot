@@ -4,3 +4,34 @@
 
 [node name="CharacterCustomizer" type="Control"]
 script = ExtResource("1_customizer")
+
+[node name="Center" type="CenterContainer" parent="."]
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+
+[node name="Grid" type="GridContainer" parent="Center"]
+columns = 3
+[node name="Button1" type="Button" parent="Center/Grid"]
+text = "Button 1"
+[node name="Button2" type="Button" parent="Center/Grid"]
+text = "Button 2"
+[node name="Button3" type="Button" parent="Center/Grid"]
+text = "Button 3"
+[node name="Button4" type="Button" parent="Center/Grid"]
+text = "Button 4"
+[node name="Button5" type="Button" parent="Center/Grid"]
+text = "Button 5"
+[node name="Button6" type="Button" parent="Center/Grid"]
+text = "Button 6"
+[node name="Button7" type="Button" parent="Center/Grid"]
+text = "Button 7"
+[node name="Button8" type="Button" parent="Center/Grid"]
+text = "Button 8"
+[node name="Button9" type="Button" parent="Center/Grid"]
+text = "Button 9"
