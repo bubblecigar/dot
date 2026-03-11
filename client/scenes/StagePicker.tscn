@@ -1,0 +1,51 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://client/scripts/ui/stage_picker.gd" id="1_picker"]
+
+[node name="StagePicker" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+script = ExtResource("1_picker")
+
+[node name="Backdrop" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+color = Color(0.08, 0.1, 0.14, 1)
+
+[node name="Layout" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="Layout"]
+text = "Stage Picker"
+horizontal_alignment = 1
+
+[node name="StageOneButton" type="Button" parent="Layout"]
+custom_minimum_size = Vector2(0, 52)
+text = "Stage 1"
+
+[node name="StageTwoButton" type="Button" parent="Layout"]
+custom_minimum_size = Vector2(0, 52)
+text = "Stage 2"
+
+[node name="StatusLabel" type="Label" parent="Layout"]
+text = "Select a stage"
+horizontal_alignment = 1

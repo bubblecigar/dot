@@ -1,14 +1,14 @@
 extends Node2D
 
 const NetworkConfig := preload("res://shared/network_config.gd")
-const INITIAL_GAMEPLAY_SCENE := "res://client/scenes/Gameplay.tscn"
+const INITIAL_SCENE := "res://client/scenes/StagePicker.tscn"
 
 @onready var gameplay_root: Node2D = $GameplayRoot
 @onready var menu_layer: CanvasLayer = $Menu
 
 func _ready() -> void:
 	SceneManager.initialize(gameplay_root)
-	SceneManager.change_scene(INITIAL_GAMEPLAY_SCENE, false)
+	SceneManager.change_scene(INITIAL_SCENE, false)
 
 	_connect_to_server()
 
