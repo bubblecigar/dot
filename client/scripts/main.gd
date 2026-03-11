@@ -10,9 +10,6 @@ func _ready() -> void:
 	SceneManager.initialize(gameplay_root)
 	SceneManager.change_scene(INITIAL_GAMEPLAY_SCENE, false)
 
-	if OS.is_debug_build():
-		menu_layer.visible = true
-
 	_connect_to_server()
 
 func _unhandled_input(event: InputEvent) -> void:
