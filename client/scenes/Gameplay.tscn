@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://client/scenes/Background.tscn" id="1_bg"]
+[ext_resource type="PackedScene" path="res://client/scenes/Circle.tscn" id="2_circle"]
+
+[node name="Gameplay" type="Node2D"]
+
+[node name="Background" parent="." instance=ExtResource("1_bg")]
+
+[node name="Circle" parent="." instance=ExtResource("2_circle")]

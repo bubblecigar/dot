@@ -20,6 +20,7 @@ features=PackedStringArray("4.2")
 ClientRpc="*res://shared/client_rpc.gd"
 StateStore="*res://client/scripts/stores/state_store.gd"
 AbilityStore="*res://client/scripts/stores/ability_store.gd"
+SceneManager="*res://client/scripts/managers/scene_manager.gd"
 
 [rendering]
 
