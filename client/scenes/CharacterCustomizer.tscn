@@ -40,49 +40,5 @@ offset_bottom = 0.0
 [node name="Grid" type="GridContainer" parent="Control/MarginContainer"]
 columns = 3
 
-[node name="Button1" type="Button" parent="Control/MarginContainer/Grid"]
-text = "Button 1"
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="Button2" type="Button" parent="Control/MarginContainer/Grid"]
-text = "Button 2"
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="Button3" type="Button" parent="Control/MarginContainer/Grid"]
-text = "Button 3"
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="Button4" type="Button" parent="Control/MarginContainer/Grid"]
-text = "Button 4"
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="Button5" type="Button" parent="Control/MarginContainer/Grid"]
-text = "Button 5"
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="Button6" type="Button" parent="Control/MarginContainer/Grid"]
-text = "Button 6"
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="Button7" type="Button" parent="Control/MarginContainer/Grid"]
-text = "Button 7"
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="Button8" type="Button" parent="Control/MarginContainer/Grid"]
-text = "Button 8"
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="Button9" type="Button" parent="Control/MarginContainer/Grid"]
-text = "Button 9"
-size_flags_horizontal = 3
-size_flags_vertical = 3
 
 
