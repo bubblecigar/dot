@@ -22,3 +22,11 @@ func _ready():
 		btn.size_flags_vertical = 3
 		grid.add_child(btn)
 
+func _input(event):
+	if event.is_action_pressed("ui_accept"):
+		var grid = $MarginContainer/Grid
+		var status = {}
+		for btn in grid.get_children():
+			status[btn.name] = btn.button_state
+		print("Button states:", status)
+
