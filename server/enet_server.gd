@@ -69,7 +69,7 @@ func _broadcast_random_number() -> void:
 		return
 
 	var value := randi_range(1, 100)
-	ClientRpc.rpc("broadcast_random_number", value)
+	ServerRpc.rpc("broadcast_random_number", value)
 
 @rpc("any_peer", "call_local", "unreliable")
 func submit_input(direction: Vector2) -> void:

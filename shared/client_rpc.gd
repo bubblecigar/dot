@@ -1,7 +1,6 @@
 extends Node
 
 const SERVER_PEER_ID := 1
-signal random_number_received(value: int)
 
 # Submit button states to server
 @rpc("any_peer", "call_remote", "reliable")
@@ -24,7 +23,3 @@ func notify_circle_moved() -> void:
 	if not multiplayer.is_server():
 		return
 	print("hello")
-
-@rpc("authority", "call_remote", "reliable")
-func broadcast_random_number(value: int) -> void:
-	random_number_received.emit(value)

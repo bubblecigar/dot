@@ -4,7 +4,7 @@ extends CanvasLayer
 var _latest_random_number: String = "N/A"
 
 func _ready() -> void:
-	ClientRpc.random_number_received.connect(_on_random_number_received)
+	ServerRpc.random_number_received.connect(_on_random_number_received)
 
 	if not OS.is_debug_build():
 		visible = false
