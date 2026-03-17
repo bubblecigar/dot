@@ -29,9 +29,7 @@ func _input(event):
 		for btn in grid.get_children():
 			status[btn.name] = btn.button_state
 		print("Button states:", status)
-		var ClientRpc = get_node_or_null("/root/ClientRpc")
-		if ClientRpc:
-			ClientRpc.submit_button_states.rpc(status)
+		if ServerRpc:
+			ServerRpc.submit_button_states(status)
 		else:
-			print("[ERROR] /root/ClientRpc not found. Button states not sent to server.")
-
+			print("[ERROR] /root/ServerRpc not found. Button states not sent to server.")
