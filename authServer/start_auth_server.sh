@@ -18,11 +18,8 @@ default_from_config() {
   ' "${HOST_CONFIG}"
 }
 
-DEFAULT_PORT="$(default_from_config port)"
-DEFAULT_MAX_CLIENTS="$(default_from_config max_clients)"
-
-PORT="${PORT:-${DEFAULT_PORT:-7000}}"
-MAX_CLIENTS="${MAX_CLIENTS:-${DEFAULT_MAX_CLIENTS:-32}}"
+DEFAULT_AUTH_PORT="$(default_from_config auth_port)"
+AUTH_PORT="${AUTH_PORT:-${DEFAULT_AUTH_PORT:-7001}}"
 
 if command -v godot >/dev/null 2>&1; then
   GODOT_BIN="godot"
@@ -35,8 +32,7 @@ fi
 
 exec "${GODOT_BIN}" \
   --headless \
-  --path "${ROOT_DIR}/server" \
-  "res://ServerMain.tscn" \
+  --path "${ROOT_DIR}/authServer" \
+  "res://AuthServerMain.tscn" \
   -- \
-  --port="${PORT}" \
-  --max-clients="${MAX_CLIENTS}"
+  --auth-port="${AUTH_PORT}"

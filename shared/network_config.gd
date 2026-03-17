@@ -6,6 +6,7 @@ const CONFIG_PATH_CANDIDATES := [
 ]
 const DEFAULT_SERVER_HOST := "127.0.0.1"
 const DEFAULT_SERVER_PORT := 7000
+const DEFAULT_AUTH_PORT := 7001
 const DEFAULT_MAX_CLIENTS := 32
 
 static func _get_config_path() -> String:
@@ -31,6 +32,10 @@ static func get_server_host() -> String:
 static func get_server_port() -> int:
 	var config := _load_config()
 	return int(config.get_value("server", "port", DEFAULT_SERVER_PORT))
+
+static func get_auth_port() -> int:
+	var config := _load_config()
+	return int(config.get_value("server", "auth_port", DEFAULT_AUTH_PORT))
 
 static func get_max_clients() -> int:
 	var config := _load_config()
