@@ -19,9 +19,9 @@ features=PackedStringArray("4.2")
 
 ClientRpc="*res://rpc/receive_from_server.gd"
 ServerRpc="*res://rpc/emit_to_server.gd"
-StateStore="*res://scripts/stores/state_store.gd"
-AbilityStore="*res://scripts/stores/ability_store.gd"
-SceneManager="*res://scripts/managers/scene_manager.gd"
+StateStore="*res://stores/state_store.gd"
+AbilityStore="*res://stores/ability_store.gd"
+SceneManager="*res://managers/scene_manager.gd"
 
 [rendering]
 
