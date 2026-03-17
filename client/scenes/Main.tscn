@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bxwlo53wph7x1"]
 
-[ext_resource type="Script" path="res://scripts/main.gd" id="1_1dw2k"]
+[ext_resource type="Script" path="res://scenes/Main.gd" id="1_1dw2k"]
 [ext_resource type="PackedScene" path="res://scenes/DebugLayer.tscn" id="4_1pt13"]
 
 [node name="abc" type="Node2D" unique_id=3931664]
