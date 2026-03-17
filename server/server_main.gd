@@ -1,12 +1,12 @@
 extends Node
 
-const NetworkConfig := preload("res://shared/network_config.gd")
+const NetworkConfig := preload("res://../shared/network_config.gd")
 
 func _ready() -> void:
 	var port := _get_int_arg("--port", NetworkConfig.get_server_port())
 	var max_clients := _get_int_arg("--max-clients", NetworkConfig.get_max_clients())
 
-	var server := preload("res://server/enet_server.gd").new()
+	var server := preload("res://enet_server.gd").new()
 	add_child(server)
 	var err := server.start(port, max_clients)
 	if err != OK:

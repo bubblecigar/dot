@@ -35,8 +35,8 @@ fi
 
 exec "${GODOT_BIN}" \
   --headless \
-  --path "${ROOT_DIR}" \
-  "server/ServerMain.tscn" \
+  --path "${ROOT_DIR}/server" \
+  "res://ServerMain.tscn" \
   -- \
   --port="${PORT}" \
   --max-clients="${MAX_CLIENTS}"

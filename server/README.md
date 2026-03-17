@@ -26,7 +26,7 @@ max_clients=32
 The script runs Godot with:
 
 ```bash
---headless --path . server/ServerMain.tscn -- --port=<PORT> --max-clients=<MAX_CLIENTS>
+--headless --path server res://ServerMain.tscn -- --port=<PORT> --max-clients=<MAX_CLIENTS>
 ```
 
-`server/server_main.gd` reads those user args and boots `server/enet_server.gd`.
+`server/server_main.gd` reads those user args and boots `server/enet_server.gd` from the dedicated `server/server.godot` project.
