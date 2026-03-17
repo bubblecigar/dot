@@ -1,6 +1,6 @@
 extends Node2D
 
-const INITIAL_SCENE := "res://client/scenes/StagePicker.tscn"
+const INITIAL_SCENE := "res://scenes/StagePicker.tscn"
 
 @onready var menu_layer: CanvasLayer = $Menu
 

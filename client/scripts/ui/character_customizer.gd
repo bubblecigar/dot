@@ -8,7 +8,7 @@ func _ready():
 	# Remove all children from the grid
 	for child in grid.get_children():
 		child.queue_free()
-	var ButtonScene = preload("res://client/scenes/Button.tscn")
+	var ButtonScene = preload("res://scenes/Button.tscn")
 	for i in range(1, 10):
 		var label = "Button %d" % i
 		var name = "Button%d" % i

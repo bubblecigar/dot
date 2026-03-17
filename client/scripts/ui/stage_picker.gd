@@ -1,7 +1,7 @@
 extends Control
 
-@export var stage_one_path: String = "res://client/scenes/CharacterCustomizer.tscn"
-@export var stage_two_path: String = "res://client/scenes/Gameplay.tscn"
+@export var stage_one_path: String = "res://scenes/CharacterCustomizer.tscn"
+@export var stage_two_path: String = "res://scenes/Gameplay.tscn"
 
 @onready var layout: VBoxContainer = $Layout
 @onready var stage_one_button: Button = $Layout/StageOneButton

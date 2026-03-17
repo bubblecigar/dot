@@ -1,7 +1,7 @@
 extends Node2D
 
-const NetworkConfig := preload("res://shared/network_config.gd")
-const INITIAL_SCENE := "res://client/scenes/StagePicker.tscn"
+const NetworkConfig := preload("res://../shared/network_config.gd")
+const INITIAL_SCENE := "res://scenes/StagePicker.tscn"
 
 @onready var gameplay_root: Node2D = $GameplayRoot
 

@@ -1,11 +1,11 @@
 [gd_scene format=3]
 
-[ext_resource type="PackedScene" path="res://client/scenes/Background.tscn" id="1_bg"]
-[ext_resource type="PackedScene" path="res://client/scenes/Circle.tscn" id="2_circle"]
+[ext_resource type="PackedScene" path="res://scenes/Background.tscn" id="1_bg"]
+[ext_resource type="PackedScene" path="res://scenes/Circle.tscn" id="2_circle"]
 
-[ext_resource type="PackedScene" path="res://client/scenes/Menu.tscn" id="3_menu"]
+[ext_resource type="PackedScene" path="res://scenes/Menu.tscn" id="3_menu"]
 
-[ext_resource type="Script" path="res://client/scripts/controllers/gameplay_controller.gd" id="4_gameplay_controller"]
+[ext_resource type="Script" path="res://scripts/controllers/gameplay_controller.gd" id="4_gameplay_controller"]
 
 [node name="Gameplay" type="Node2D"]
 script = ExtResource("4_gameplay_controller")
