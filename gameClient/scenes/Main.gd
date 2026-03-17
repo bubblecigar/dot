@@ -56,6 +56,11 @@ func _connect_to_server() -> void:
 
 func _on_connected_to_server() -> void:
 	print("Connected to ENet server")
+	ServerRpc.authenticate({
+		"status": StateStore.auth_status,
+		"username": StateStore.auth_username,
+		"token": StateStore.auth_token,
+	})
 
 func _on_connection_failed() -> void:
 	push_warning("Connection to ENet server failed")
