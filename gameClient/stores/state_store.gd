@@ -3,6 +3,9 @@ extends Node
 const SAVE_PATH := "user://state_store.cfg"
 
 var circle_position: Vector2 = Vector2.ZERO
+var auth_status: String = "unauthenticated"
+var auth_username: String = ""
+var auth_token: String = ""
 
 func _ready() -> void:
 	_load_state()
@@ -32,6 +35,11 @@ func get_debug_snapshot() -> Dictionary:
 
 		snapshot[name] = get(name)
 	return snapshot
+
+func set_auth_data(status: String, username: String, token: String) -> void:
+	auth_status = status
+	auth_username = username
+	auth_token = token
 
 func save_state() -> void:
 	var config := ConfigFile.new()
