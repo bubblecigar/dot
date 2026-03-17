@@ -17,8 +17,8 @@ features=PackedStringArray("4.2")
 
 [autoload]
 
-ClientRpc="*res://client_rpc.gd"
-ServerRpc="*res://server_rpc.gd"
+ClientRpc="*res://rpc/client_rpc.gd"
+ServerRpc="*res://rpc/server_rpc.gd"
 StateStore="*res://scripts/stores/state_store.gd"
 AbilityStore="*res://scripts/stores/ability_store.gd"
 SceneManager="*res://scripts/managers/scene_manager.gd"

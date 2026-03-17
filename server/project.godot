@@ -17,5 +17,5 @@ features=PackedStringArray("4.2")
 
 [autoload]
 
-ClientRpc="*res://client_rpc.gd"
-ServerRpc="*res://server_rpc.gd"
+ClientRpc="*res://rpc/client_rpc.gd"
+ServerRpc="*res://rpc/server_rpc.gd"
