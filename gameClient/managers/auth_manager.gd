@@ -73,7 +73,7 @@ func _authenticate_with_auth_server(action: String, email: String, password: Str
 	return await AuthApiClient.login(email, password)
 
 func _connect_to_game_server() -> Dictionary:
-	var host := _get_string_arg("--server-host", NetworkConfig.get_server_host())
+	var host := _get_string_arg("--server-host", NetworkConfig.get_public_game_host())
 	var port := _get_int_arg("--server-port", NetworkConfig.get_server_port())
 
 	var peer := ENetMultiplayerPeer.new()

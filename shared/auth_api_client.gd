@@ -44,7 +44,7 @@ static func send_request(payload: Dictionary) -> Dictionary:
 			"error": "missing_network_config",
 		}
 
-	var host := _get_string_arg("--auth-host", network_config.get_server_host())
+	var host := _get_string_arg("--auth-host", network_config.get_public_auth_host())
 	var auth_port := _get_int_arg("--auth-port", network_config.get_auth_port())
 	var auth_peer := StreamPeerTCP.new()
 	var err := auth_peer.connect_to_host(host, auth_port)

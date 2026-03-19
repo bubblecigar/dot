@@ -9,19 +9,21 @@
 Optional settings:
 
 ```bash
-PORT=7000 MAX_CLIENTS=64 ./gameServer/start_game_server.sh
+GAME_PORT=7000 MAX_CLIENTS=64 PUBLIC_GAME_HOST=game.example.com PUBLIC_AUTH_HOST=auth.example.com ./gameServer/start_game_server.sh
 ```
 
 Defaults come from `shared/host.config`:
 
 ```ini
 [server]
-host="127.0.0.1"
-port=7000
+bind_host="0.0.0.0"
+public_game_host="127.0.0.1"
+public_auth_host="127.0.0.1"
+game_port=7000
 max_clients=32
 ```
 
-`PORT`/`MAX_CLIENTS` environment variables override that file.
+`GAME_PORT`, `MAX_CLIENTS`, `PUBLIC_GAME_HOST`, and `PUBLIC_AUTH_HOST` environment variables override that file.
 
 The script runs Godot with:
 
@@ -29,6 +31,8 @@ The script runs Godot with:
 --headless --path gameServer res://ServerMain.tscn -- --port=<PORT> --max-clients=<MAX_CLIENTS>
 ```
 
-`gameServer/server_main.gd` reads those user args and boots `gameServer/enet_server.gd` from the dedicated game server project.
+`gameServer/server_main.gd` reads the port/max-client user args, while `shared/network_config.gd` reads the public host values from env vars or `shared/host.config`.
+
+`ENetMultiplayerPeer.create_server()` listens on all interfaces, so there is no separate game-server bind-host setting here.
 
 Run the auth service separately with [`authServer/start_auth_server.sh`](/Users/roy.wang/Desktop/daily/dot/authServer/start_auth_server.sh).

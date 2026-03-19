@@ -6,13 +6,13 @@ var _server := TCPServer.new()
 var _clients: Array[Dictionary] = []
 var _sessions: Dictionary = {}
 
-func start(port: int) -> int:
+func start(port: int, bind_host: String = "*") -> int:
 	randomize()
-	var err := _server.listen(port)
+	var err := _server.listen(port, bind_host)
 	if err != OK:
 		return err
 
-	print("Auth server started on port %d" % port)
+	print("Auth server started on %s:%d" % [bind_host, port])
 	return OK
 
 func _process(_delta: float) -> void:

@@ -18,8 +18,13 @@ default_from_config() {
   ' "${HOST_CONFIG}"
 }
 
+DEFAULT_BIND_HOST="$(default_from_config bind_host)"
 DEFAULT_AUTH_PORT="$(default_from_config auth_port)"
+DEFAULT_PUBLIC_AUTH_HOST="$(default_from_config public_auth_host)"
+
+BIND_HOST="${BIND_HOST:-${DEFAULT_BIND_HOST:-0.0.0.0}}"
 AUTH_PORT="${AUTH_PORT:-${DEFAULT_AUTH_PORT:-7001}}"
+PUBLIC_AUTH_HOST="${PUBLIC_AUTH_HOST:-${DEFAULT_PUBLIC_AUTH_HOST:-127.0.0.1}}"
 
 if command -v godot >/dev/null 2>&1; then
   GODOT_BIN="godot"
@@ -30,9 +35,14 @@ else
   exit 1
 fi
 
-exec "${GODOT_BIN}" \
+exec env \
+  BIND_HOST="${BIND_HOST}" \
+  AUTH_PORT="${AUTH_PORT}" \
+  PUBLIC_AUTH_HOST="${PUBLIC_AUTH_HOST}" \
+  "${GODOT_BIN}" \
   --headless \
   --path "${ROOT_DIR}/authServer" \
   "res://AuthServerMain.tscn" \
   -- \
+  --bind-host="${BIND_HOST}" \
   --auth-port="${AUTH_PORT}"
