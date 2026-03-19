@@ -1,0 +1,64 @@
+# Local Override Test Commands
+
+Use these commands to verify that env-var overrides still work across the auth server, game server, and client.
+
+## 1. Auth Server
+
+```bash
+cd /Users/roy.wang/Desktop/daily/dot
+BIND_HOST=0.0.0.0 AUTH_PORT=8124 PUBLIC_AUTH_HOST=127.0.0.1 ./authServer/start_auth_server.sh
+```
+
+Expected startup log:
+
+```text
+Auth server started on 0.0.0.0:8124
+```
+
+## 2. Game Server
+
+```bash
+cd /Users/roy.wang/Desktop/daily/dot
+GAME_PORT=8123 AUTH_PORT=8124 PUBLIC_GAME_HOST=127.0.0.1 PUBLIC_AUTH_HOST=127.0.0.1 AUTH_UPSTREAM_HOST=127.0.0.1 MAX_CLIENTS=32 ./gameServer/start_game_server.sh
+```
+
+Expected startup log:
+
+```text
+ENet server started on port 8123
+```
+
+## 3. Client
+
+Env-only override:
+
+```bash
+cd /Users/roy.wang/Desktop/daily/dot/gameClient
+PUBLIC_GAME_HOST=127.0.0.1 PUBLIC_AUTH_HOST=127.0.0.1 GAME_PORT=8123 AUTH_PORT=8124 godot --path .
+```
+
+If your machine uses `godot4` instead:
+
+```bash
+cd /Users/roy.wang/Desktop/daily/dot/gameClient
+PUBLIC_GAME_HOST=127.0.0.1 PUBLIC_AUTH_HOST=127.0.0.1 GAME_PORT=8123 AUTH_PORT=8124 godot4 --path .
+```
+
+CLI-arg override test:
+
+```bash
+cd /Users/roy.wang/Desktop/daily/dot/gameClient
+PUBLIC_GAME_HOST=bad.example.com PUBLIC_AUTH_HOST=bad.example.com GAME_PORT=9999 AUTH_PORT=9998 godot --path . -- --server-host=127.0.0.1 --server-port=8123 --auth-host=127.0.0.1 --auth-port=8124
+```
+
+This verifies that client user args still override env vars.
+
+## Optional Port Checks
+
+From another terminal:
+
+```bash
+lsof -nP -iTCP:8123 -sTCP:LISTEN
+lsof -nP -iTCP:8124 -sTCP:LISTEN
+nc -vz 127.0.0.1 8124
+```

@@ -7,6 +7,7 @@ const CONFIG_PATH_CANDIDATES := [
 const DEFAULT_BIND_HOST := "0.0.0.0"
 const DEFAULT_PUBLIC_GAME_HOST := "127.0.0.1"
 const DEFAULT_PUBLIC_AUTH_HOST := "127.0.0.1"
+const DEFAULT_AUTH_UPSTREAM_HOST := "127.0.0.1"
 const DEFAULT_GAME_PORT := 7000
 const DEFAULT_AUTH_PORT := 7001
 const DEFAULT_MAX_CLIENTS := 32
@@ -55,6 +56,9 @@ static func get_public_game_host() -> String:
 
 static func get_public_auth_host() -> String:
 	return _get_string("server", "public_auth_host", "PUBLIC_AUTH_HOST", DEFAULT_PUBLIC_AUTH_HOST)
+
+static func get_auth_upstream_host() -> String:
+	return _get_string("server", "auth_upstream_host", "AUTH_UPSTREAM_HOST", get_public_auth_host())
 
 static func get_server_host() -> String:
 	return get_public_game_host()
