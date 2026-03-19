@@ -1,8 +1,7 @@
 extends Node
 
 const NetworkConfig := preload("res://../shared/network_config.gd")
-const AUTH_CONNECT_TIMEOUT_MS := 3000
-const AUTH_RESPONSE_TIMEOUT_MS := 3000
+const AuthApiClient := preload("res://../shared/auth_api_client.gd")
 const GAME_CONNECT_TIMEOUT_MS := 3000
 const GAME_AUTH_TIMEOUT_MS := 3000
 
@@ -64,35 +63,9 @@ func _authenticate_and_connect(action: String, email: String, password: String) 
 	}
 
 func _authenticate_with_auth_server(action: String, email: String, password: String) -> Dictionary:
-	var host := _get_string_arg("--auth-host", NetworkConfig.get_server_host())
-	var auth_port := _get_int_arg("--auth-port", NetworkConfig.get_auth_port())
-	var auth_peer := StreamPeerTCP.new()
-	var err := auth_peer.connect_to_host(host, auth_port)
-	if err != OK:
-		return {
-			"ok": false,
-			"error": "auth_connect_failed_%d" % err,
-		}
-
-	var connected := await _wait_for_tcp_status(
-		auth_peer,
-		StreamPeerTCP.STATUS_CONNECTED,
-		AUTH_CONNECT_TIMEOUT_MS
-	)
-	if not connected:
-		auth_peer.disconnect_from_host()
-		return {
-			"ok": false,
-			"error": "auth_connect_timeout",
-		}
-
-	var response := await _send_auth_request(auth_peer, {
-		"action": action,
-		"email": email,
-		"password": password,
-	})
-	auth_peer.disconnect_from_host()
-	return response
+	if action == "register":
+		return await AuthApiClient.register(email, password)
+	return await AuthApiClient.login(email, password)
 
 func _connect_to_game_server() -> Dictionary:
 	var host := _get_string_arg("--server-host", NetworkConfig.get_server_host())
@@ -129,61 +102,6 @@ func _connect_to_game_server() -> Dictionary:
 		"ok": false,
 		"error": "game_connect_timeout",
 	}
-
-func _send_auth_request(auth_peer: StreamPeerTCP, payload: Dictionary) -> Dictionary:
-	var packet := JSON.stringify(payload) + "\n"
-	var err := auth_peer.put_data(packet.to_utf8_buffer())
-	if err != OK:
-		return {
-			"ok": false,
-			"error": "auth_send_failed_%d" % err,
-		}
-
-	return await _read_auth_response(auth_peer)
-
-func _read_auth_response(auth_peer: StreamPeerTCP) -> Dictionary:
-	var response_buffer := ""
-	var deadline := Time.get_ticks_msec() + AUTH_RESPONSE_TIMEOUT_MS
-	while Time.get_ticks_msec() < deadline:
-		auth_peer.poll()
-		if auth_peer.get_status() != StreamPeerTCP.STATUS_CONNECTED:
-			return {
-				"ok": false,
-				"error": "auth_disconnected",
-			}
-
-		var bytes_available := auth_peer.get_available_bytes()
-		if bytes_available > 0:
-			response_buffer += auth_peer.get_utf8_string(bytes_available)
-			var newline_index := response_buffer.find("\n")
-			if newline_index != -1:
-				var line := response_buffer.substr(0, newline_index).strip_edges()
-				var parsed = JSON.parse_string(line)
-				if typeof(parsed) == TYPE_DICTIONARY:
-					return parsed
-				return {
-					"ok": false,
-					"error": "auth_invalid_response",
-				}
-
-		await get_tree().process_frame
-
-	return {
-		"ok": false,
-		"error": "auth_response_timeout",
-	}
-
-func _wait_for_tcp_status(auth_peer: StreamPeerTCP, target_status: int, timeout_ms: int) -> bool:
-	var deadline := Time.get_ticks_msec() + timeout_ms
-	while Time.get_ticks_msec() < deadline:
-		auth_peer.poll()
-		var status := auth_peer.get_status()
-		if status == target_status:
-			return true
-		if status == StreamPeerTCP.STATUS_ERROR:
-			return false
-		await get_tree().process_frame
-	return false
 
 func _on_server_disconnected() -> void:
 	print("Disconnected from ENet server")
