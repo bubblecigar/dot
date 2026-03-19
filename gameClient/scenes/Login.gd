@@ -13,8 +13,8 @@ func _ready() -> void:
 		SceneManager.change_scene(NEXT_SCENE_PATH, false)
 		return
 
-	email_input.text = StateStore.saved_login_email
-	password_input.text = StateStore.saved_login_password
+	email_input.text = LocalStore.saved_login_email
+	password_input.text = LocalStore.saved_login_password
 
 	login_button.pressed.connect(_on_login_pressed)
 	register_button.pressed.connect(_on_register_pressed)
@@ -48,7 +48,7 @@ func _submit_login(should_register: bool) -> void:
 		password_input.grab_focus()
 		return
 
-	StateStore.set_saved_login_credentials(email, password)
+	LocalStore.set_saved_login_credentials(email, password)
 	_set_inputs_disabled(true)
 	status_label.text = "Registering..." if should_register else "Logging in..."
 
@@ -73,4 +73,4 @@ func _set_inputs_disabled(disabled: bool) -> void:
 	register_button.disabled = disabled
 
 func _on_credentials_changed(_value: String) -> void:
-	StateStore.set_saved_login_credentials(email_input.text.strip_edges(), password_input.text)
+	LocalStore.set_saved_login_credentials(email_input.text.strip_edges(), password_input.text)
