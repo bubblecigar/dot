@@ -6,6 +6,8 @@ var circle_position: Vector2 = Vector2.ZERO
 var auth_status: String = "unauthenticated"
 var auth_username: String = ""
 var auth_token: String = ""
+var saved_login_email: String = ""
+var saved_login_password: String = ""
 
 func _ready() -> void:
 	_load_state()
@@ -41,10 +43,17 @@ func set_auth_data(status: String, username: String, token: String) -> void:
 	auth_username = username
 	auth_token = token
 
+func set_saved_login_credentials(email: String, password: String) -> void:
+	saved_login_email = email
+	saved_login_password = password
+	save_state()
+
 func save_state() -> void:
 	var config := ConfigFile.new()
 	config.set_value("circle", "x", circle_position.x)
 	config.set_value("circle", "y", circle_position.y)
+	config.set_value("login", "email", saved_login_email)
+	config.set_value("login", "password", saved_login_password)
 	config.save(SAVE_PATH)
 
 func _load_state() -> void:
@@ -56,3 +65,5 @@ func _load_state() -> void:
 	var x := float(config.get_value("circle", "x", 0.0))
 	var y := float(config.get_value("circle", "y", 0.0))
 	circle_position = Vector2(x, y)
+	saved_login_email = str(config.get_value("login", "email", ""))
+	saved_login_password = str(config.get_value("login", "password", ""))
