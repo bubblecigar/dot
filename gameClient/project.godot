@@ -22,6 +22,7 @@ ServerRpc="*res://rpc/emit_to_server.gd"
 StateStore="*res://stores/state_store.gd"
 AbilityStore="*res://stores/ability_store.gd"
 SceneManager="*res://managers/scene_manager.gd"
+AuthManager="*res://managers/auth_manager.gd"
 
 [rendering]
 

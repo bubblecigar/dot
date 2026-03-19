@@ -77,7 +77,7 @@ func _handle_request(raw_line: String) -> Dictionary:
 
 	var payload: Dictionary = parsed
 	var action := str(payload.get("action", ""))
-	var username := str(payload.get("username", "")).strip_edges()
+	var username := str(payload.get("email", payload.get("username", ""))).strip_edges()
 	var password := str(payload.get("password", ""))
 	print("Auth request: action=%s username=%s" % [action, username])
 
