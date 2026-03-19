@@ -27,27 +27,9 @@ offset_bottom = -40.0
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-columns = 2
+columns = 1
 theme_override_constants/h_separation = 18
 theme_override_constants/v_separation = 18
-
-[node name="TitleCard" type="PanelContainer" parent="MarginContainer/Grid"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Grid/TitleCard"]
-layout_mode = 2
-theme_override_constants/margin_left = 24
-theme_override_constants/margin_top = 24
-theme_override_constants/margin_right = 24
-theme_override_constants/margin_bottom = 24
-
-[node name="Title" type="Label" parent="MarginContainer/Grid/TitleCard/MarginContainer"]
-layout_mode = 2
-text = "Login"
-horizontal_alignment = 1
-vertical_alignment = 1
 
 [node name="EmailCard" type="PanelContainer" parent="MarginContainer/Grid"]
 layout_mode = 2
