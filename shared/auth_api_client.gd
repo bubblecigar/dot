@@ -2,9 +2,19 @@ extends RefCounted
 
 class_name AuthApiClient
 
-const NetworkConfig := preload("res://../shared/network_config.gd")
+const NETWORK_CONFIG_PATH_CANDIDATES := [
+	"res://shared/network_config.gd",
+	"res://../shared/network_config.gd",
+]
 const AUTH_CONNECT_TIMEOUT_MS := 3000
 const AUTH_RESPONSE_TIMEOUT_MS := 3000
+
+static func _get_network_config():
+	for path in NETWORK_CONFIG_PATH_CANDIDATES:
+		if ResourceLoader.exists(path):
+			return load(path)
+	push_error("Unable to locate network_config.gd")
+	return null
 
 static func login(email: String, password: String) -> Dictionary:
 	return await send_request({
@@ -27,8 +37,15 @@ static func validate_token(token: String) -> Dictionary:
 	})
 
 static func send_request(payload: Dictionary) -> Dictionary:
-	var host := _get_string_arg("--auth-host", NetworkConfig.get_server_host())
-	var auth_port := _get_int_arg("--auth-port", NetworkConfig.get_auth_port())
+	var network_config = _get_network_config()
+	if network_config == null:
+		return {
+			"ok": false,
+			"error": "missing_network_config",
+		}
+
+	var host := _get_string_arg("--auth-host", network_config.get_server_host())
+	var auth_port := _get_int_arg("--auth-port", network_config.get_auth_port())
 	var auth_peer := StreamPeerTCP.new()
 	var err := auth_peer.connect_to_host(host, auth_port)
 	if err != OK:

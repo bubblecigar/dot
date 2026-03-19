@@ -1,7 +1,7 @@
 extends Node
 
-const NetworkConfig := preload("res://../shared/network_config.gd")
-const AuthApiClient := preload("res://../shared/auth_api_client.gd")
+const NetworkConfig := preload("res://shared/network_config.gd")
+const AuthApiClient := preload("res://shared/auth_api_client.gd")
 const GAME_CONNECT_TIMEOUT_MS := 3000
 const GAME_AUTH_TIMEOUT_MS := 3000
 
