@@ -88,7 +88,35 @@ echo "Project: ${PROJECT_DIR}"
 echo "Preset: ${PRESET_NAME}"
 echo "Output: ${OUTPUT_PATH}"
 
-exec "${GODOT_BIN}" \
+"${GODOT_BIN}" \
   --headless \
   --path "${PROJECT_DIR}" \
   --export-release "${PRESET_NAME}" "${OUTPUT_PATH}"
+
+if [[ "${OUTPUT_PATH}" == *.dmg ]]; then
+  if ! command -v hdiutil >/dev/null 2>&1; then
+    echo "Error: hdiutil is required to extract DMG contents." >&2
+    exit 1
+  fi
+
+  EXTRACT_DIR="${OUTPUT_PATH%.dmg}_extracted"
+  MOUNT_POINT="$(mktemp -d "/tmp/gameClient_dmg_mount.XXXXXX")"
+
+  cleanup() {
+    hdiutil detach "${MOUNT_POINT}" -quiet >/dev/null 2>&1 || true
+    rmdir "${MOUNT_POINT}" >/dev/null 2>&1 || true
+  }
+  trap cleanup EXIT
+
+  rm -rf "${EXTRACT_DIR}"
+  mkdir -p "${EXTRACT_DIR}"
+
+  echo "Mounting DMG for extraction"
+  hdiutil attach "${OUTPUT_PATH}" -mountpoint "${MOUNT_POINT}" -nobrowse -quiet
+
+  echo "Extracting DMG contents to ${EXTRACT_DIR}"
+  cp -R "${MOUNT_POINT}/." "${EXTRACT_DIR}/"
+
+  cleanup
+  trap - EXIT
+fi
