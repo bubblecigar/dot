@@ -10,6 +10,11 @@ signal authentication_failed(message: String)
 signal game_server_disconnected()
 
 var _is_busy: bool = false
+var _pending_game_auth_result: Dictionary = {}
+
+func _ready() -> void:
+	if not ClientRpc.auth_result_received.is_connected(_on_game_server_auth_result):
+		ClientRpc.auth_result_received.connect(_on_game_server_auth_result)
 
 func login(email: String, password: String) -> Dictionary:
 	return await _authenticate_and_connect("login", email, password)
@@ -88,7 +93,7 @@ func _connect_to_game_server() -> Dictionary:
 		var status := peer.get_connection_status()
 		if status == MultiplayerPeer.CONNECTION_CONNECTED:
 			print("Connected to ENet server")
-			ClientRpc.consume_auth_result()
+			_pending_game_auth_result = {}
 			ServerRpc.authenticate({
 				"token": StateStore.auth_token,
 			})
@@ -110,8 +115,9 @@ func _on_server_disconnected() -> void:
 func _wait_for_game_server_auth_result() -> Dictionary:
 	var deadline := Time.get_ticks_msec() + GAME_AUTH_TIMEOUT_MS
 	while Time.get_ticks_msec() < deadline:
-		var result := ClientRpc.consume_auth_result()
+		var result := _pending_game_auth_result
 		if not result.is_empty():
+			_pending_game_auth_result = {}
 			if not bool(result.get("ok", false)):
 				multiplayer.multiplayer_peer = null
 			return result
@@ -122,6 +128,9 @@ func _wait_for_game_server_auth_result() -> Dictionary:
 		"ok": false,
 		"error": "game_auth_timeout",
 	}
+
+func _on_game_server_auth_result(result: Dictionary) -> void:
+	_pending_game_auth_result = result
 
 func _get_string_arg(flag: String, default_value: String) -> String:
 	for arg in OS.get_cmdline_user_args():
