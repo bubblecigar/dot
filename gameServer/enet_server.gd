@@ -61,7 +61,7 @@ func _on_peer_connected(peer_id: int) -> void:
 	print("Peer connected: %d" % peer_id)
 
 func _on_peer_disconnected(peer_id: int) -> void:
-	ServerRpc.clear_peer_auth(peer_id)
+	SessionAuthService.clear_peer_auth(peer_id)
 	_players.erase(peer_id)
 	print("Peer disconnected: %d" % peer_id)
 
@@ -75,7 +75,7 @@ func _broadcast_random_number() -> void:
 @rpc("any_peer", "call_local", "unreliable")
 func submit_input(direction: Vector2) -> void:
 	var peer_id := multiplayer.get_remote_sender_id()
-	if not ServerRpc.is_peer_authenticated(peer_id):
+	if not SessionAuthService.is_peer_authenticated(peer_id):
 		print("Rejected input from unauthenticated peer %d" % peer_id)
 		return
 	if not _players.has(peer_id):
