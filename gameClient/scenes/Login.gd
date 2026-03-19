@@ -9,6 +9,10 @@ const NEXT_SCENE_PATH := "res://scenes/StagePicker.tscn"
 @onready var status_label: Label = $MarginContainer/Grid/StatusCard/MarginContainer/StatusLabel
 
 func _ready() -> void:
+	if StateStore.auth_status == "authenticated":
+		SceneManager.change_scene(NEXT_SCENE_PATH, false)
+		return
+
 	login_button.pressed.connect(_on_login_pressed)
 	register_button.pressed.connect(_on_register_pressed)
 	email_input.text_submitted.connect(_on_email_submitted)
