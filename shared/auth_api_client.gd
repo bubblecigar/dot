@@ -46,6 +46,15 @@ static func send_request(payload: Dictionary) -> Dictionary:
 
 	var host := _get_string_arg("--auth-host", network_config.get_auth_upstream_host())
 	var auth_port := _get_int_arg("--auth-port", network_config.get_auth_port())
+	print(
+		"Game client connecting to auth server env=%s config=%s host=%s port=%d"
+		% [
+			network_config.get_config_env_name(),
+			network_config.get_active_config_path(),
+			host,
+			auth_port,
+		]
+	)
 	var auth_peer := StreamPeerTCP.new()
 	var err := auth_peer.connect_to_host(host, auth_port)
 	if err != OK:

@@ -15,6 +15,7 @@ var _pending_game_auth_result: Dictionary = {}
 func _ready() -> void:
 	if not ClientRpc.auth_result_received.is_connected(_on_game_server_auth_result):
 		ClientRpc.auth_result_received.connect(_on_game_server_auth_result)
+	_log_client_network_config()
 
 func login(email: String, password: String) -> Dictionary:
 	return await _authenticate_and_connect("login", email, password)
@@ -75,6 +76,15 @@ func _authenticate_with_auth_server(action: String, email: String, password: Str
 func _connect_to_game_server() -> Dictionary:
 	var host := _get_string_arg("--server-host", NetworkConfig.get_public_game_host())
 	var port := _get_int_arg("--server-port", NetworkConfig.get_server_port())
+	print(
+		"Game client connecting to game server env=%s config=%s host=%s port=%d"
+		% [
+			NetworkConfig.get_config_env_name(),
+			NetworkConfig.get_active_config_path(),
+			host,
+			port,
+		]
+	)
 
 	var peer := ENetMultiplayerPeer.new()
 	var err := peer.create_client(host, port)
@@ -143,3 +153,16 @@ func _get_int_arg(flag: String, default_value: int) -> int:
 		if arg.begins_with(flag + "="):
 			return int(arg.get_slice("=", 1))
 	return default_value
+
+func _log_client_network_config() -> void:
+	print(
+		"Game client config env=%s config=%s auth_host=%s auth_port=%d game_host=%s game_port=%d"
+		% [
+			NetworkConfig.get_config_env_name(),
+			NetworkConfig.get_active_config_path(),
+			_get_string_arg("--auth-host", NetworkConfig.get_public_auth_host()),
+			_get_int_arg("--auth-port", NetworkConfig.get_auth_port()),
+			_get_string_arg("--server-host", NetworkConfig.get_public_game_host()),
+			_get_int_arg("--server-port", NetworkConfig.get_server_port()),
+		]
+	)
