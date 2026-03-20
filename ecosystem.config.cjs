@@ -8,11 +8,13 @@ module.exports = {
       autorestart: true,
       restart_delay: 3000,
       env_local: {
+        GODOT_BIN: "godot",
         BIND_HOST: "0.0.0.0",
         AUTH_PORT: "7001",
         PUBLIC_AUTH_HOST: "127.0.0.1",
       },
       env_prod: {
+        GODOT_BIN: "/root/dot/Godot_v4.6.1-stable_linux.x86_64",
         BIND_HOST: "0.0.0.0",
         AUTH_PORT: "7001",
         PUBLIC_AUTH_HOST: "198.13.54.180",
@@ -26,6 +28,7 @@ module.exports = {
       autorestart: true,
       restart_delay: 3000,
       env_local: {
+        GODOT_BIN: "godot",
         GAME_PORT: "7000",
         AUTH_PORT: "7001",
         PUBLIC_GAME_HOST: "127.0.0.1",
@@ -34,6 +37,7 @@ module.exports = {
         MAX_CLIENTS: "32",
       },
       env_prod: {
+        GODOT_BIN: "/root/dot/Godot_v4.6.1-stable_linux.x86_64",
         GAME_PORT: "7000",
         AUTH_PORT: "7001",
         PUBLIC_GAME_HOST: "198.13.54.180",

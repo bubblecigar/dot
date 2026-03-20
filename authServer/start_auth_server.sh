@@ -26,7 +26,9 @@ BIND_HOST="${BIND_HOST:-${DEFAULT_BIND_HOST:-0.0.0.0}}"
 AUTH_PORT="${AUTH_PORT:-${DEFAULT_AUTH_PORT:-7001}}"
 PUBLIC_AUTH_HOST="${PUBLIC_AUTH_HOST:-${DEFAULT_PUBLIC_AUTH_HOST:-127.0.0.1}}"
 
-if command -v godot >/dev/null 2>&1; then
+if [[ -n "${GODOT_BIN:-}" ]]; then
+  :
+elif command -v godot >/dev/null 2>&1; then
   GODOT_BIN="godot"
 elif command -v godot4 >/dev/null 2>&1; then
   GODOT_BIN="godot4"

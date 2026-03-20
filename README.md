@@ -107,3 +107,21 @@ pm2 restart ecosystem.config.cjs --env prod
 pm2 save
 pm2 startup
 ```
+
+# Deploy
+Use [deploy_vps.sh](/Users/roy.wang/Desktop/daily/dot/scripts/deploy_vps.sh) to upload the repo to the VPS and restart the PM2-managed servers.
+
+Production deploy:
+```bash
+cd /Users/roy.wang/Desktop/daily/dot
+REMOTE_HOST=198.13.54.180 REMOTE_USER=root REMOTE_DIR=/root/dot PM2_ENV=prod ./scripts/deploy_vps.sh
+```
+
+Optional overrides:
+```bash
+REMOTE_HOST=198.13.54.180
+REMOTE_USER=root
+REMOTE_DIR=/root/dot
+PM2_ENV=prod
+SSH_OPTS="-i ~/.ssh/your_key"
+```
