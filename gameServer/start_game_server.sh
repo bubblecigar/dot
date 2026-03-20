@@ -2,7 +2,14 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+CONFIG_ENV="${CONFIG_ENV:-local}"
+ENV_CONFIG="${ROOT_DIR}/shared/${CONFIG_ENV}.config"
 HOST_CONFIG="${ROOT_DIR}/shared/host.config"
+if [[ -f "${ENV_CONFIG}" ]]; then
+  ACTIVE_CONFIG="${ENV_CONFIG}"
+else
+  ACTIVE_CONFIG="${HOST_CONFIG}"
+fi
 
 default_from_config() {
   local key="$1"
@@ -15,7 +22,7 @@ default_from_config() {
       print $2
       exit
     }
-  ' "${HOST_CONFIG}"
+  ' "${ACTIVE_CONFIG}"
 }
 
 DEFAULT_PORT="$(default_from_config game_port)"
@@ -42,6 +49,7 @@ else
 fi
 
 exec env \
+  CONFIG_ENV="${CONFIG_ENV}" \
   PUBLIC_GAME_HOST="${PUBLIC_GAME_HOST}" \
   PUBLIC_AUTH_HOST="${PUBLIC_AUTH_HOST}" \
   AUTH_UPSTREAM_HOST="${AUTH_UPSTREAM_HOST}" \

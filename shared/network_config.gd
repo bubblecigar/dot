@@ -1,9 +1,6 @@
 extends RefCounted
 
-const CONFIG_PATH_CANDIDATES := [
-	"res://shared/host.config",
-	"res://../shared/host.config",
-]
+const DEFAULT_CONFIG_ENV := "local"
 const DEFAULT_BIND_HOST := "0.0.0.0"
 const DEFAULT_PUBLIC_GAME_HOST := "127.0.0.1"
 const DEFAULT_PUBLIC_AUTH_HOST := "127.0.0.1"
@@ -12,11 +9,32 @@ const DEFAULT_GAME_PORT := 7000
 const DEFAULT_AUTH_PORT := 7001
 const DEFAULT_MAX_CLIENTS := 32
 
+static func _get_config_env() -> String:
+	var config_env := _get_env_string("CONFIG_ENV").to_lower()
+	if config_env.is_empty():
+		return DEFAULT_CONFIG_ENV
+	return config_env
+
+static func _get_config_path_candidates() -> Array[String]:
+	var config_env := _get_config_env()
+	return [
+		"res://shared/%s.config" % config_env,
+		"res://../shared/%s.config" % config_env,
+		"res://shared/host.config",
+		"res://../shared/host.config",
+	]
+
 static func _get_config_path() -> String:
-	for path in CONFIG_PATH_CANDIDATES:
+	for path in _get_config_path_candidates():
 		if FileAccess.file_exists(path):
 			return path
 	return ""
+
+static func get_config_env_name() -> String:
+	return _get_config_env()
+
+static func get_active_config_path() -> String:
+	return _get_config_path()
 
 static func _load_config() -> ConfigFile:
 	var config := ConfigFile.new()
