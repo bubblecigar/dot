@@ -1,7 +1,8 @@
 extends Node2D
 
 const LOGIN_SCENE := "res://scenes/Login.tscn"
-const AUTHENTICATED_SCENE := "res://scenes/StagePicker.tscn"
+const ROOM_LIST_SCENE := "res://scenes/RoomList.tscn"
+const ROOM_SCENE := "res://scenes/Room.tscn"
 
 @onready var gameplay_root: Node2D = $GameplayRoot
 
@@ -22,5 +23,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _get_initial_scene() -> String:
 	if StateStore.auth_status == "authenticated":
-		return AUTHENTICATED_SCENE
+		if not StateStore.current_room_id.is_empty():
+			return ROOM_SCENE
+		return ROOM_LIST_SCENE
 	return LOGIN_SCENE

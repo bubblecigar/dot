@@ -62,8 +62,9 @@ func _on_peer_connected(peer_id: int) -> void:
 
 func _on_peer_disconnected(peer_id: int) -> void:
 	SessionAuthService.clear_peer_auth(peer_id)
+	RoomService.remove_rooms_for_owner(peer_id)
 	_players.erase(peer_id)
-	print("Peer disconnected: %d" % peer_id)
+	print("Peer disconnected: %d (remaining players: %d)" % [peer_id, _players.size()])
 
 func _broadcast_random_number() -> void:
 	if _players.is_empty():

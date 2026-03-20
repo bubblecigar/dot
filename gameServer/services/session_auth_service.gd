@@ -50,6 +50,12 @@ func is_peer_authenticated(peer_id: int) -> bool:
 func get_authenticated_username(peer_id: int) -> String:
 	return str(_authenticated_peers.get(peer_id, ""))
 
+func get_authenticated_peer_ids() -> Array[int]:
+	var peer_ids: Array[int] = []
+	for peer_id in _authenticated_peers.keys():
+		peer_ids.append(int(peer_id))
+	return peer_ids
+
 func clear_peer_auth(peer_id: int) -> void:
 	_authenticated_peers.erase(peer_id)
 	_pending_auth_peers.erase(peer_id)

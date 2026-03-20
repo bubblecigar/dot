@@ -4,6 +4,7 @@ const NetworkConfig := preload("res://shared/network_config.gd")
 const AuthApiClient := preload("res://shared/auth_api_client.gd")
 const GAME_CONNECT_TIMEOUT_MS := 3000
 const GAME_AUTH_TIMEOUT_MS := 3000
+const ROOM_SCENE_PATH := "res://scenes/Room.tscn"
 
 signal authenticated(username: String)
 signal authentication_failed(message: String)
@@ -15,6 +16,10 @@ var _pending_game_auth_result: Dictionary = {}
 func _ready() -> void:
 	if not ClientRpc.auth_result_received.is_connected(_on_game_server_auth_result):
 		ClientRpc.auth_result_received.connect(_on_game_server_auth_result)
+	if not ClientRpc.room_list_received.is_connected(_on_room_list_received):
+		ClientRpc.room_list_received.connect(_on_room_list_received)
+	if not ClientRpc.room_joined_received.is_connected(_on_room_joined_received):
+		ClientRpc.room_joined_received.connect(_on_room_joined_received)
 	_log_client_network_config()
 
 func login(email: String, password: String) -> Dictionary:
@@ -141,6 +146,16 @@ func _wait_for_game_server_auth_result() -> Dictionary:
 
 func _on_game_server_auth_result(result: Dictionary) -> void:
 	_pending_game_auth_result = result
+
+func _on_room_list_received(rooms: Array) -> void:
+	StateStore.set_available_rooms(rooms)
+
+func _on_room_joined_received(room: Dictionary) -> void:
+	var room_id := str(room.get("id", "")).strip_edges()
+	if room_id.is_empty():
+		return
+	StateStore.set_current_room_id(room_id)
+	SceneManager.change_scene(ROOM_SCENE_PATH, true)
 
 func _get_string_arg(flag: String, default_value: String) -> String:
 	for arg in OS.get_cmdline_user_args():

@@ -1,6 +1,6 @@
 extends Control
 
-const NEXT_SCENE_PATH := "res://scenes/StagePicker.tscn"
+const NEXT_SCENE_PATH := "res://scenes/RoomList.tscn"
 
 @onready var email_input: LineEdit = $MarginContainer/Grid/EmailCard/MarginContainer/Layout/EmailInput
 @onready var password_input: LineEdit = $MarginContainer/Grid/PasswordCard/MarginContainer/Layout/PasswordInput

@@ -20,3 +20,4 @@ features=PackedStringArray("4.2")
 ClientRpc="*res://rpc/emit_to_client.gd"
 ServerRpc="*res://rpc/receive_from_client.gd"
 SessionAuthService="*res://services/session_auth_service.gd"
+RoomService="*res://services/room_service.gd"

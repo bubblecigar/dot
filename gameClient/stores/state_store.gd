@@ -3,6 +3,8 @@ extends Node
 var auth_status: String = "unauthenticated"
 var auth_username: String = ""
 var auth_token: String = ""
+var available_rooms: Array = []
+var current_room_id: String = ""
 
 func get_debug_snapshot() -> Dictionary:
 	var snapshot := {}
@@ -22,3 +24,9 @@ func set_auth_data(status: String, username: String, token: String) -> void:
 	auth_status = status
 	auth_username = username
 	auth_token = token
+
+func set_available_rooms(rooms: Array) -> void:
+	available_rooms = rooms.duplicate(true)
+
+func set_current_room_id(room_id: String) -> void:
+	current_room_id = room_id.strip_edges()

@@ -13,3 +13,17 @@ func auth_result(result: Dictionary) -> void:
 		return
 
 	rpc("auth_result", result)
+
+@rpc("authority", "call_remote", "reliable")
+func room_list(rooms: Array) -> void:
+	if multiplayer.multiplayer_peer == null:
+		return
+
+	rpc("room_list", rooms)
+
+@rpc("authority", "call_remote", "reliable")
+func room_joined(room: Dictionary) -> void:
+	if multiplayer.multiplayer_peer == null:
+		return
+
+	rpc("room_joined", room)

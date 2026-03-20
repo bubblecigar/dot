@@ -2,6 +2,8 @@ extends Node
 
 signal random_number_received(value: int)
 signal auth_result_received(result: Dictionary)
+signal room_list_received(rooms: Array)
+signal room_joined_received(room: Dictionary)
 
 @rpc("authority", "call_remote", "reliable")
 func broadcast_random_number(value: int) -> void:
@@ -10,3 +12,11 @@ func broadcast_random_number(value: int) -> void:
 @rpc("authority", "call_remote", "reliable")
 func auth_result(result: Dictionary) -> void:
 	auth_result_received.emit(result)
+
+@rpc("authority", "call_remote", "reliable")
+func room_list(rooms: Array) -> void:
+	room_list_received.emit(rooms)
+
+@rpc("authority", "call_remote", "reliable")
+func room_joined(room: Dictionary) -> void:
+	room_joined_received.emit(room)

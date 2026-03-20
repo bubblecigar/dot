@@ -42,6 +42,39 @@ func notify_circle_moved() -> void:
 		return
 	print("hello")
 
+@rpc("any_peer", "call_remote", "reliable")
+func request_room_list() -> void:
+	if not multiplayer.is_server():
+		return
+	var peer_id := multiplayer.get_remote_sender_id()
+	if not SessionAuthService.is_peer_authenticated(peer_id):
+		print("Rejected room list request from unauthenticated peer %d" % peer_id)
+		return
+
+	var username := SessionAuthService.get_authenticated_username(peer_id)
+	var rooms := RoomService.get_rooms()
+	print(
+		"Room list requested by peer %d (%s): %d rooms"
+		% [peer_id, username, rooms.size()]
+	)
+	ClientRpc.rpc_id(peer_id, "room_list", rooms)
+
+@rpc("any_peer", "call_remote", "reliable")
+func create_room() -> void:
+	if not multiplayer.is_server():
+		return
+	var peer_id := multiplayer.get_remote_sender_id()
+	if not SessionAuthService.is_peer_authenticated(peer_id):
+		print("Rejected room creation from unauthenticated peer %d" % peer_id)
+		return
+
+	var username := SessionAuthService.get_authenticated_username(peer_id)
+	var room := RoomService.create_room(peer_id, username)
+	print("Room created by peer %d (%s): %s" % [peer_id, username, str(room.get("id", ""))])
+	ClientRpc.rpc_id(peer_id, "room_joined", room)
+	print("Sent room_joined to peer %d for %s" % [peer_id, str(room.get("id", ""))])
+	_broadcast_room_list()
+
 func _reject_peer(peer_id: int, error: String) -> void:
 	SessionAuthService.clear_peer_auth(peer_id)
 	ClientRpc.rpc_id(peer_id, "auth_result", {
@@ -53,3 +86,10 @@ func _reject_peer(peer_id: int, error: String) -> void:
 	var peer := multiplayer.multiplayer_peer
 	if peer is ENetMultiplayerPeer:
 		(peer as ENetMultiplayerPeer).disconnect_peer(peer_id)
+
+func _broadcast_room_list() -> void:
+	var rooms := RoomService.get_rooms()
+	var peer_ids := SessionAuthService.get_authenticated_peer_ids()
+	print("Broadcasting room list to %d authenticated peers: %d rooms" % [peer_ids.size(), rooms.size()])
+	for peer_id in peer_ids:
+		ClientRpc.rpc_id(peer_id, "room_list", rooms)
