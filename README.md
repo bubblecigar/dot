@@ -62,3 +62,23 @@ lsof -nP -iTCP:8123 -sTCP:LISTEN
 lsof -nP -iTCP:8124 -sTCP:LISTEN
 nc -vz 127.0.0.1 8124
 ```
+
+
+# PUBLIC
+1. client
+```
+cd /Users/roy.wang/Desktop/daily/dot/gameClient
+godot --path . -- --auth-host=198.13.54.180 --auth-port=7001 --server-host=198.13.54.180 --server-port=7000
+```
+
+2. GameServer on VPS root
+```
+cd ~/dot/gameServer
+../Godot_v4.6.1-stable_linux.x86_64 --headless --path .
+```
+
+3. AuthServer on VPS
+```
+cd ~/dot/authServer
+../Godot_v4.6.1-stable_linux.x86_64 --headless --path .
+``` 
