@@ -81,4 +81,29 @@ cd ~/dot/gameServer
 ```
 cd ~/dot/authServer
 ../Godot_v4.6.1-stable_linux.x86_64 --headless --path .
-``` 
+```
+
+# PM2
+Use [ecosystem.config.cjs](/Users/roy.wang/Desktop/daily/dot/ecosystem.config.cjs) to run the auth server and game server in the background.
+
+Local environment:
+```bash
+cd /Users/roy.wang/Desktop/daily/dot
+pm2 start ecosystem.config.cjs --env local
+```
+
+Production environment:
+```bash
+cd /root/dot
+pm2 start ecosystem.config.cjs --env prod
+```
+
+Common PM2 commands:
+```bash
+pm2 status
+pm2 logs authServer
+pm2 logs gameServer
+pm2 restart ecosystem.config.cjs --env prod
+pm2 save
+pm2 startup
+```
