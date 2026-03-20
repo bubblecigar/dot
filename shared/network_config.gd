@@ -26,8 +26,6 @@ static func _get_config_path_candidates() -> Array[String]:
 	return [
 		"res://shared/%s.config" % config_env,
 		"res://../shared/%s.config" % config_env,
-		"res://shared/host.config",
-		"res://../shared/host.config",
 	]
 
 static func _get_config_path() -> String:

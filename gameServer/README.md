@@ -12,7 +12,7 @@ Optional settings:
 GAME_PORT=7000 MAX_CLIENTS=64 PUBLIC_GAME_HOST=game.example.com PUBLIC_AUTH_HOST=auth.example.com AUTH_UPSTREAM_HOST=127.0.0.1 ./gameServer/start_game_server.sh
 ```
 
-Defaults come from `shared/host.config`:
+Defaults come from `shared/<CONFIG_ENV>.config`:
 
 ```ini
 [server]
@@ -32,7 +32,7 @@ The script runs Godot with:
 --headless --path gameServer res://ServerMain.tscn -- --port=<PORT> --max-clients=<MAX_CLIENTS>
 ```
 
-`gameServer/server_main.gd` reads the port/max-client user args, while `shared/network_config.gd` reads the public host values and auth upstream host from env vars or `shared/host.config`.
+`gameServer/server_main.gd` reads the port/max-client user args, while `shared/network_config.gd` reads the public host values and auth upstream host from env vars or `shared/<CONFIG_ENV>.config`.
 
 `ENetMultiplayerPeer.create_server()` listens on all interfaces, so there is no separate game-server bind-host setting here.
 

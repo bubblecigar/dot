@@ -90,7 +90,6 @@ PM2 only selects `CONFIG_ENV` and `GODOT_BIN`.
 Host and port values live in:
 - [local.config](/Users/roy.wang/Desktop/daily/dot/shared/local.config)
 - [prod.config](/Users/roy.wang/Desktop/daily/dot/shared/prod.config)
-- [host.config](/Users/roy.wang/Desktop/daily/dot/shared/host.config) as fallback
 
 Local environment:
 ```bash

@@ -12,7 +12,7 @@ Optional settings:
 BIND_HOST=0.0.0.0 AUTH_PORT=7001 PUBLIC_AUTH_HOST=auth.example.com ./authServer/start_auth_server.sh
 ```
 
-Defaults come from `shared/host.config`:
+Defaults come from `shared/<CONFIG_ENV>.config`:
 
 ```ini
 [server]

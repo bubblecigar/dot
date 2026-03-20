@@ -4,11 +4,11 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CONFIG_ENV="${CONFIG_ENV:-local}"
 ENV_CONFIG="${ROOT_DIR}/shared/${CONFIG_ENV}.config"
-HOST_CONFIG="${ROOT_DIR}/shared/host.config"
-if [[ -f "${ENV_CONFIG}" ]]; then
-  ACTIVE_CONFIG="${ENV_CONFIG}"
-else
-  ACTIVE_CONFIG="${HOST_CONFIG}"
+ACTIVE_CONFIG="${ENV_CONFIG}"
+
+if [[ ! -f "${ACTIVE_CONFIG}" ]]; then
+  echo "Error: config file not found for CONFIG_ENV=${CONFIG_ENV}: ${ACTIVE_CONFIG}" >&2
+  exit 1
 fi
 
 default_from_config() {
