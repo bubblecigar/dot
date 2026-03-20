@@ -1,6 +1,7 @@
 extends RefCounted
 
 const DEFAULT_CONFIG_ENV := "local"
+const DEFAULT_EXPORTED_CONFIG_ENV := "prod"
 const DEFAULT_BIND_HOST := "0.0.0.0"
 const DEFAULT_PUBLIC_GAME_HOST := "127.0.0.1"
 const DEFAULT_PUBLIC_AUTH_HOST := "127.0.0.1"
@@ -12,8 +13,13 @@ const DEFAULT_MAX_CLIENTS := 32
 static func _get_config_env() -> String:
 	var config_env := _get_env_string("CONFIG_ENV").to_lower()
 	if config_env.is_empty():
-		return DEFAULT_CONFIG_ENV
+		return _get_default_config_env()
 	return config_env
+
+static func _get_default_config_env() -> String:
+	if OS.has_feature(DEFAULT_EXPORTED_CONFIG_ENV):
+		return DEFAULT_EXPORTED_CONFIG_ENV
+	return DEFAULT_CONFIG_ENV
 
 static func _get_config_path_candidates() -> Array[String]:
 	var config_env := _get_config_env()
