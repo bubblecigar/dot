@@ -4,9 +4,6 @@ const NetworkConfig := preload("res://shared/network_config.gd")
 const AuthApiClient := preload("res://shared/auth_api_client.gd")
 const GAME_CONNECT_TIMEOUT_MS := 3000
 const GAME_AUTH_TIMEOUT_MS := 3000
-const LOGIN_SCENE_PATH := "res://scenes/Login.tscn"
-const ROOM_LIST_SCENE_PATH := "res://scenes/RoomList.tscn"
-const ROOM_SCENE_PATH := "res://scenes/Room.tscn"
 
 signal authenticated(username: String)
 signal authentication_failed(message: String)
@@ -14,14 +11,10 @@ signal game_server_disconnected()
 
 var _is_busy: bool = false
 var _pending_game_auth_result: Dictionary = {}
-var _logout_requested: bool = false
-var _logout_disconnect_requested: bool = false
 
 func _ready() -> void:
 	if not ClientRpc.auth_result_received.is_connected(_on_game_server_auth_result):
 		ClientRpc.auth_result_received.connect(_on_game_server_auth_result)
-	if not ClientRpc.game_state_updated_received.is_connected(_on_game_state_updated_received):
-		ClientRpc.game_state_updated_received.connect(_on_game_state_updated_received)
 	_log_client_network_config()
 
 func login(email: String, password: String) -> Dictionary:
@@ -29,25 +22,6 @@ func login(email: String, password: String) -> Dictionary:
 
 func register(email: String, password: String) -> Dictionary:
 	return await _authenticate_and_connect("register", email, password)
-
-func logout() -> void:
-	if _logout_requested:
-		return
-
-	_logout_requested = true
-	_logout_disconnect_requested = false
-
-	var peer := multiplayer.multiplayer_peer
-	if peer == null:
-		_finalize_local_logout()
-		return
-
-	var room_id := _get_current_room_id()
-	if not room_id.is_empty():
-		ServerRpc.leave_room(room_id)
-		return
-
-	_request_server_logout()
 
 func _authenticate_and_connect(action: String, email: String, password: String) -> Dictionary:
 	if _is_busy:
@@ -147,8 +121,6 @@ func _connect_to_game_server() -> Dictionary:
 func _on_server_disconnected() -> void:
 	print("Disconnected from ENet server")
 	multiplayer.multiplayer_peer = null
-	if _logout_requested:
-		_finalize_local_logout()
 	game_server_disconnected.emit()
 
 func _wait_for_game_server_auth_result() -> Dictionary:
@@ -170,44 +142,6 @@ func _wait_for_game_server_auth_result() -> Dictionary:
 
 func _on_game_server_auth_result(result: Dictionary) -> void:
 	_pending_game_auth_result = result
-
-func _on_game_state_updated_received(state: Dictionary) -> void:
-	StateStore.set_game_state(state)
-	_route_from_game_state(state)
-
-func _get_current_room_id() -> String:
-	return str(StateStore.game_state.get("room_id", "")).strip_edges()
-
-func _route_from_game_state(state: Dictionary) -> void:
-	var room_id := str(state.get("room_id", "")).strip_edges()
-	var current_scene := SceneManager.get_current_scene()
-	if room_id.is_empty():
-		if _logout_requested:
-			_request_server_logout()
-			return
-		if current_scene != null and current_scene.scene_file_path == ROOM_SCENE_PATH and StateStore.auth_status == "authenticated":
-			SceneManager.change_scene(ROOM_LIST_SCENE_PATH, true)
-		return
-
-	if current_scene != null and current_scene.scene_file_path == ROOM_SCENE_PATH:
-		return
-
-	SceneManager.change_scene(ROOM_SCENE_PATH, true)
-
-func _request_server_logout() -> void:
-	if _logout_disconnect_requested:
-		return
-	_logout_disconnect_requested = true
-	ServerRpc.logout()
-
-func _finalize_local_logout() -> void:
-	_pending_game_auth_result = {}
-	_is_busy = false
-	_logout_requested = false
-	_logout_disconnect_requested = false
-	StateStore.clear_auth_data()
-	StateStore.clear_game_state()
-	SceneManager.change_scene(LOGIN_SCENE_PATH, false)
 
 func _get_string_arg(flag: String, default_value: String) -> String:
 	for arg in OS.get_cmdline_user_args():

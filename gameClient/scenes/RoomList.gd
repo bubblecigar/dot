@@ -30,7 +30,7 @@ func _request_room_list() -> void:
 
 func _on_logout_pressed() -> void:
 	status_label.text = "Logging out..."
-	AuthManager.logout()
+	SessionFlowManager.logout()
 
 func _on_room_list_received(rooms: Array) -> void:
 	_render_room_list(rooms)

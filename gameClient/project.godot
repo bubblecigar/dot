@@ -23,6 +23,7 @@ StateStore="*res://stores/state_store.gd"
 LocalStore="*res://stores/local_store.gd"
 SceneManager="*res://managers/scene_manager.gd"
 AuthManager="*res://managers/auth_manager.gd"
+SessionFlowManager="*res://managers/session_flow_manager.gd"
 
 [rendering]
 
