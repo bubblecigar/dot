@@ -9,6 +9,9 @@ signal authenticated(username: String)
 signal authentication_failed(message: String)
 signal game_server_disconnected()
 
+var auth_status: String = "unauthenticated"
+var auth_username: String = ""
+var auth_token: String = ""
 var _is_busy: bool = false
 var _pending_game_auth_result: Dictionary = {}
 
@@ -31,17 +34,17 @@ func _authenticate_and_connect(action: String, email: String, password: String) 
 		}
 
 	_is_busy = true
-	StateStore.set_auth_data("authenticating", "", "")
+	_set_auth_data("authenticating", "", "")
 
 	var auth_result := await _authenticate_with_auth_server(action, email, password)
 	if not bool(auth_result.get("ok", false)):
 		var auth_error := str(auth_result.get("error", "auth_failed"))
-		StateStore.set_auth_data("failed", "", "")
+		_set_auth_data("failed", "", "")
 		authentication_failed.emit(auth_error)
 		_is_busy = false
 		return auth_result
 
-	StateStore.set_auth_data(
+	_set_auth_data(
 		"authenticating",
 		str(auth_result.get("username", "")),
 		str(auth_result.get("token", "")),
@@ -50,22 +53,22 @@ func _authenticate_and_connect(action: String, email: String, password: String) 
 	var connect_result := await _connect_to_game_server()
 	if not bool(connect_result.get("ok", false)):
 		var connect_error := str(connect_result.get("error", "game_connect_failed"))
-		StateStore.set_auth_data("failed", StateStore.auth_username, StateStore.auth_token)
+		_set_auth_data("failed", auth_username, auth_token)
 		authentication_failed.emit(connect_error)
 		_is_busy = false
 		return connect_result
 
-	StateStore.set_auth_data(
+	_set_auth_data(
 		"authenticated",
-		str(connect_result.get("username", StateStore.auth_username)),
-		StateStore.auth_token,
+		str(connect_result.get("username", auth_username)),
+		auth_token,
 	)
-	authenticated.emit(StateStore.auth_username)
+	authenticated.emit(auth_username)
 	_is_busy = false
 	return {
 		"ok": true,
-		"username": StateStore.auth_username,
-		"token": StateStore.auth_token,
+		"username": auth_username,
+		"token": auth_token,
 	}
 
 func _authenticate_with_auth_server(action: String, email: String, password: String) -> Dictionary:
@@ -105,7 +108,7 @@ func _connect_to_game_server() -> Dictionary:
 			print("Connected to ENet server")
 			_pending_game_auth_result = {}
 			ServerRpc.authenticate({
-				"token": StateStore.auth_token,
+				"token": auth_token,
 			})
 			return await _wait_for_game_server_auth_result()
 		if status == MultiplayerPeer.CONNECTION_DISCONNECTED:
@@ -142,6 +145,14 @@ func _wait_for_game_server_auth_result() -> Dictionary:
 
 func _on_game_server_auth_result(result: Dictionary) -> void:
 	_pending_game_auth_result = result
+
+func clear_auth_data() -> void:
+	_set_auth_data("unauthenticated", "", "")
+
+func _set_auth_data(status: String, username: String, token: String) -> void:
+	auth_status = status
+	auth_username = username
+	auth_token = token
 
 func _get_string_arg(flag: String, default_value: String) -> String:
 	for arg in OS.get_cmdline_user_args():

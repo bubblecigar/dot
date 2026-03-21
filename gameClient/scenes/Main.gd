@@ -22,7 +22,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 
 func _get_initial_scene() -> String:
-	if StateStore.auth_status == "authenticated":
+	if AuthManager.auth_status == "authenticated":
 		if not str(StateStore.game_state.get("room_id", "")).strip_edges().is_empty():
 			return ROOM_SCENE
 		return ROOM_LIST_SCENE

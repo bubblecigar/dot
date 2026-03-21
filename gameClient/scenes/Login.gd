@@ -9,7 +9,7 @@ const NEXT_SCENE_PATH := "res://scenes/RoomList.tscn"
 @onready var status_label: Label = $MarginContainer/Grid/StatusCard/MarginContainer/StatusLabel
 
 func _ready() -> void:
-	if StateStore.auth_status == "authenticated":
+	if AuthManager.auth_status == "authenticated":
 		SceneManager.change_scene(NEXT_SCENE_PATH, false)
 		return
 

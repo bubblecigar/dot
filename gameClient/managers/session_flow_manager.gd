@@ -50,7 +50,7 @@ func _route_from_game_state(state: Dictionary) -> void:
 		if _logout_requested:
 			_request_server_logout()
 			return
-		if current_scene != null and current_scene.scene_file_path == ROOM_SCENE_PATH and StateStore.auth_status == "authenticated":
+		if current_scene != null and current_scene.scene_file_path == ROOM_SCENE_PATH and AuthManager.auth_status == "authenticated":
 			SceneManager.change_scene(ROOM_LIST_SCENE_PATH, true)
 		return
 
@@ -68,6 +68,6 @@ func _request_server_logout() -> void:
 func _finalize_local_logout() -> void:
 	_logout_requested = false
 	_logout_disconnect_requested = false
-	StateStore.clear_auth_data()
+	AuthManager.clear_auth_data()
 	StateStore.clear_game_state()
 	SceneManager.change_scene(LOGIN_SCENE_PATH, false)

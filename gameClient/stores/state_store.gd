@@ -1,8 +1,5 @@
 extends Node
 
-var auth_status: String = "unauthenticated"
-var auth_username: String = ""
-var auth_token: String = ""
 var game_state: Dictionary = {}
 
 func get_debug_snapshot() -> Dictionary:
@@ -18,14 +15,6 @@ func get_debug_snapshot() -> Dictionary:
 
 		snapshot[name] = get(name)
 	return snapshot
-
-func set_auth_data(status: String, username: String, token: String) -> void:
-	auth_status = status
-	auth_username = username
-	auth_token = token
-
-func clear_auth_data() -> void:
-	set_auth_data("unauthenticated", "", "")
 
 func set_game_state(state: Dictionary) -> void:
 	game_state = state.duplicate(true)
