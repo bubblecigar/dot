@@ -2,7 +2,6 @@ extends Node
 
 const NetworkConfig := preload("res://shared/network_config.gd")
 const AuthApiClient := preload("res://shared/auth_api_client.gd")
-const SharedGameState := preload("res://../shared/game_state.gd")
 const GAME_CONNECT_TIMEOUT_MS := 3000
 const GAME_AUTH_TIMEOUT_MS := 3000
 const LOGIN_SCENE_PATH := "res://scenes/Login.tscn"
@@ -175,20 +174,10 @@ func _on_room_joined_received(room: Dictionary) -> void:
 	var room_id := str(room.get("id", "")).strip_edges()
 	if room_id.is_empty():
 		return
-	_sync_game_state_from_room(room)
 	SceneManager.change_scene(ROOM_SCENE_PATH, true)
 
 func _on_game_state_updated_received(state: Dictionary) -> void:
 	StateStore.set_game_state(state)
-
-func _sync_game_state_from_room(room: Dictionary) -> void:
-	var current_state := StateStore.game_state
-	var next_state: Dictionary
-	if current_state.is_empty():
-		next_state = SharedGameState.create_from_room(room)
-	else:
-		next_state = SharedGameState.sync_from_room(current_state, room)
-	StateStore.set_game_state(next_state)
 
 func _get_current_room_id() -> String:
 	return str(StateStore.game_state.get("room_id", "")).strip_edges()
