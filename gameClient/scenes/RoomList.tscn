@@ -45,6 +45,7 @@ theme_override_constants/margin_bottom = 24
 [node name="Title" type="Label" parent="MarginContainer/Grid/TitleCard/MarginContainer"]
 layout_mode = 2
 horizontal_alignment = 1
+theme_override_font_sizes/font_size = 34
 text = "Room List"
 
 [node name="CreateRoomCard" type="PanelContainer" parent="MarginContainer/Grid"]
@@ -61,8 +62,9 @@ theme_override_constants/margin_bottom = 24
 
 [node name="CreateRoomButton" type="Button" parent="MarginContainer/Grid/CreateRoomCard/MarginContainer"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 56)
+custom_minimum_size = Vector2(0, 72)
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
 text = "Create Room"
 
 [node name="RefreshCard" type="PanelContainer" parent="MarginContainer/Grid"]
@@ -79,8 +81,9 @@ theme_override_constants/margin_bottom = 24
 
 [node name="RefreshButton" type="Button" parent="MarginContainer/Grid/RefreshCard/MarginContainer"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 56)
+custom_minimum_size = Vector2(0, 72)
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
 text = "Refresh Rooms"
 
 [node name="LogoutCard" type="PanelContainer" parent="MarginContainer/Grid"]
@@ -97,8 +100,9 @@ theme_override_constants/margin_bottom = 24
 
 [node name="LogoutButton" type="Button" parent="MarginContainer/Grid/LogoutCard/MarginContainer"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 56)
+custom_minimum_size = Vector2(0, 72)
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
 text = "Logout"
 
 [node name="RoomsCard" type="PanelContainer" parent="MarginContainer/Grid"]
@@ -132,6 +136,7 @@ theme_override_constants/margin_bottom = 24
 [node name="StatusLabel" type="Label" parent="MarginContainer/Grid/StatusCard/MarginContainer"]
 layout_mode = 2
 text = "Waiting for server..."
+theme_override_font_sizes/font_size = 28
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2

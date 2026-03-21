@@ -45,6 +45,7 @@ theme_override_constants/margin_bottom = 24
 [node name="Title" type="Label" parent="MarginContainer/Grid/TitleCard/MarginContainer"]
 layout_mode = 2
 horizontal_alignment = 1
+theme_override_font_sizes/font_size = 34
 text = "Room"
 
 [node name="RoomIdCard" type="PanelContainer" parent="MarginContainer/Grid"]
@@ -62,6 +63,7 @@ theme_override_constants/margin_bottom = 24
 [node name="RoomIdLabel" type="Label" parent="MarginContainer/Grid/RoomIdCard/MarginContainer"]
 layout_mode = 2
 horizontal_alignment = 1
+theme_override_font_sizes/font_size = 30
 text = "Room ID:"
 autowrap_mode = 2
 
@@ -80,6 +82,7 @@ theme_override_constants/margin_bottom = 24
 [node name="PhaseLabel" type="Label" parent="MarginContainer/Grid/PhaseCard/MarginContainer"]
 layout_mode = 2
 horizontal_alignment = 1
+theme_override_font_sizes/font_size = 30
 text = "Phase: waiting"
 autowrap_mode = 2
 
@@ -97,6 +100,7 @@ theme_override_constants/margin_bottom = 24
 
 [node name="MembersLabel" type="Label" parent="MarginContainer/Grid/MembersCard/MarginContainer"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 28
 text = "Members:"
 autowrap_mode = 2
 
@@ -114,8 +118,9 @@ theme_override_constants/margin_bottom = 24
 
 [node name="ReadyButton" type="Button" parent="MarginContainer/Grid/ReadyCard/MarginContainer"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 56)
+custom_minimum_size = Vector2(0, 72)
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 30
 text = "Ready"
 
 [node name="BackCard" type="PanelContainer" parent="MarginContainer/Grid"]
@@ -132,6 +137,7 @@ theme_override_constants/margin_bottom = 24
 
 [node name="BackButton" type="Button" parent="MarginContainer/Grid/BackCard/MarginContainer"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 56)
+custom_minimum_size = Vector2(0, 72)
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 30
 text = "Back to Room List"
