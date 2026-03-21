@@ -6,7 +6,6 @@
 [node name="abc" type="Node2D" unique_id=3931664]
 script = ExtResource("1_1dw2k")
 
-[node name="GameplayRoot" type="Node2D" parent="."]
+[node name="SceneRoot" type="Node2D" parent="."]
 
 [node name="DebugLayer" parent="." instance=ExtResource("4_1pt13")]
-

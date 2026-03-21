@@ -4,10 +4,10 @@ const LOGIN_SCENE := "res://scenes/Login.tscn"
 const ROOM_LIST_SCENE := "res://scenes/RoomList.tscn"
 const ROOM_SCENE := "res://scenes/Room.tscn"
 
-@onready var gameplay_root: Node2D = $GameplayRoot
+@onready var scene_root: Node2D = $SceneRoot
 
 func _ready() -> void:
-	SceneManager.initialize(gameplay_root)
+	SceneManager.initialize(scene_root)
 	SceneManager.change_scene(_get_initial_scene(), false)
 
 func _unhandled_input(event: InputEvent) -> void:
