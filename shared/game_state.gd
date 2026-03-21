@@ -1,12 +1,30 @@
 extends RefCounted
 
 const PHASE_WAITING := "waiting"
+const PHASE_INPUT := "input"
 
 static func create_from_room(room: Dictionary) -> Dictionary:
 	return _build_state({}, room)
 
 static func sync_from_room(state: Dictionary, room: Dictionary) -> Dictionary:
 	return _build_state(state, room)
+
+static func set_player_ready(state: Dictionary, username: String, is_ready: bool) -> Dictionary:
+	var next_state := state.duplicate(true)
+	var normalized_username := username.strip_edges()
+	var players: Array = next_state.get("players", [])
+	var updated_players: Array = []
+
+	for player_variant in players:
+		var player := player_variant as Dictionary
+		var next_player := player.duplicate(true)
+		if str(next_player.get("username", "")).strip_edges() == normalized_username:
+			next_player["is_ready"] = is_ready
+		updated_players.append(next_player)
+
+	next_state["players"] = updated_players
+	next_state["phase"] = _resolve_phase(updated_players)
+	return next_state
 
 static func _build_state(existing_state: Dictionary, room: Dictionary) -> Dictionary:
 	var next_state := existing_state.duplicate(true)
@@ -19,7 +37,9 @@ static func _build_state(existing_state: Dictionary, room: Dictionary) -> Dictio
 	next_state["phase"] = str(existing_state.get("phase", PHASE_WAITING))
 	next_state["round"] = int(existing_state.get("round", 1))
 	next_state["turn"] = int(existing_state.get("turn", 0))
-	next_state["players"] = _build_players(existing_state.get("players", []), members)
+	var players := _build_players(existing_state.get("players", []), members)
+	next_state["players"] = players
+	next_state["phase"] = _resolve_phase(players)
 	return next_state
 
 static func _build_players(existing_players_variant: Variant, members: Array) -> Array:
@@ -45,3 +65,14 @@ static func _build_players(existing_players_variant: Variant, members: Array) ->
 			"is_ready": bool(existing_player.get("is_ready", false)),
 		})
 	return players
+
+static func _resolve_phase(players: Array) -> String:
+	if players.is_empty():
+		return PHASE_WAITING
+
+	for player_variant in players:
+		var player := player_variant as Dictionary
+		if not bool(player.get("is_ready", false)):
+			return PHASE_WAITING
+
+	return PHASE_INPUT

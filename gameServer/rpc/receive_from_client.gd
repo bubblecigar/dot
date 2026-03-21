@@ -126,6 +126,31 @@ func leave_room(room_id: String) -> void:
 	_broadcast_room_list()
 
 @rpc("any_peer", "call_remote", "reliable")
+func set_player_ready(is_ready: bool) -> void:
+	if not multiplayer.is_server():
+		return
+	var peer_id := multiplayer.get_remote_sender_id()
+	if not SessionAuthService.is_peer_authenticated(peer_id):
+		print("Rejected set_player_ready from unauthenticated peer %d" % peer_id)
+		return
+
+	var username := SessionAuthService.get_authenticated_username(peer_id)
+	var room_id := _find_room_id_for_username(username)
+	if room_id.is_empty():
+		print("Rejected set_player_ready for peer %d (%s): not in room" % [peer_id, username])
+		return
+
+	var current_state: Dictionary = _room_game_states.get(room_id, {})
+	if current_state.is_empty():
+		print("Rejected set_player_ready for peer %d (%s): missing game state for %s" % [peer_id, username, room_id])
+		return
+
+	var next_state := SharedGameState.set_player_ready(current_state, username, is_ready)
+	_room_game_states[room_id] = next_state
+	print("Peer %d (%s) set ready=%s in %s" % [peer_id, username, str(is_ready), room_id])
+	_broadcast_game_state_update(next_state.duplicate(true))
+
+@rpc("any_peer", "call_remote", "reliable")
 func logout() -> void:
 	if not multiplayer.is_server():
 		return
@@ -193,3 +218,15 @@ func _sync_game_state_for_room(room: Dictionary) -> Dictionary:
 		next_state = SharedGameState.sync_from_room(current_state, room)
 	_room_game_states[room_id] = next_state
 	return next_state.duplicate(true)
+
+func _find_room_id_for_username(username: String) -> String:
+	var normalized_username := username.strip_edges()
+	for room_id_variant in _room_game_states.keys():
+		var room_id := str(room_id_variant).strip_edges()
+		var state: Dictionary = _room_game_states.get(room_id, {})
+		var players: Array = state.get("players", [])
+		for player_variant in players:
+			var player := player_variant as Dictionary
+			if str(player.get("username", "")).strip_edges() == normalized_username:
+				return room_id
+	return ""

@@ -65,6 +65,24 @@ horizontal_alignment = 1
 text = "Room ID:"
 autowrap_mode = 2
 
+[node name="PhaseCard" type="PanelContainer" parent="MarginContainer/Grid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Grid/PhaseCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="PhaseLabel" type="Label" parent="MarginContainer/Grid/PhaseCard/MarginContainer"]
+layout_mode = 2
+horizontal_alignment = 1
+text = "Phase: waiting"
+autowrap_mode = 2
+
 [node name="MembersCard" type="PanelContainer" parent="MarginContainer/Grid"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -81,6 +99,24 @@ theme_override_constants/margin_bottom = 24
 layout_mode = 2
 text = "Members:"
 autowrap_mode = 2
+
+[node name="ReadyCard" type="PanelContainer" parent="MarginContainer/Grid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Grid/ReadyCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="ReadyButton" type="Button" parent="MarginContainer/Grid/ReadyCard/MarginContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
+size_flags_horizontal = 3
+text = "Ready"
 
 [node name="BackCard" type="PanelContainer" parent="MarginContainer/Grid"]
 layout_mode = 2

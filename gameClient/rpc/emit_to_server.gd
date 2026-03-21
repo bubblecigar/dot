@@ -81,3 +81,13 @@ func logout() -> void:
 		return
 
 	rpc_id(SERVER_PEER_ID, "logout")
+
+@rpc("any_peer", "call_remote", "reliable")
+func set_player_ready(is_ready: bool) -> void:
+	var peer := multiplayer.multiplayer_peer
+	if peer == null:
+		return
+	if peer.get_connection_status() != MultiplayerPeer.CONNECTION_CONNECTED:
+		return
+
+	rpc_id(SERVER_PEER_ID, "set_player_ready", is_ready)
