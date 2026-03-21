@@ -2,6 +2,7 @@ extends Node
 
 const NetworkConfig := preload("res://shared/network_config.gd")
 const AuthApiClient := preload("res://shared/auth_api_client.gd")
+const SharedGameState := preload("res://../shared/game_state.gd")
 const GAME_CONNECT_TIMEOUT_MS := 3000
 const GAME_AUTH_TIMEOUT_MS := 3000
 const LOGIN_SCENE_PATH := "res://scenes/Login.tscn"
@@ -34,8 +35,9 @@ func register(email: String, password: String) -> Dictionary:
 	return await _authenticate_and_connect("register", email, password)
 
 func logout() -> void:
-	if not StateStore.current_room_id.is_empty() and multiplayer.multiplayer_peer != null:
-		ServerRpc.leave_room(StateStore.current_room_id)
+	var room_id := _get_current_room_id()
+	if not room_id.is_empty() and multiplayer.multiplayer_peer != null:
+		ServerRpc.leave_room(room_id)
 
 	var peer := multiplayer.multiplayer_peer
 	multiplayer.multiplayer_peer = null
@@ -44,7 +46,6 @@ func logout() -> void:
 
 	_pending_game_auth_result = {}
 	_is_busy = false
-	StateStore.clear_room_data()
 	StateStore.clear_available_rooms()
 	StateStore.clear_auth_data()
 	StateStore.clear_game_state()
@@ -176,18 +177,31 @@ func _on_room_joined_received(room: Dictionary) -> void:
 	var room_id := str(room.get("id", "")).strip_edges()
 	if room_id.is_empty():
 		return
-	StateStore.set_current_room_id(room_id)
+	_sync_game_state_from_room(room)
 	SceneManager.change_scene(ROOM_SCENE_PATH, true)
 
 func _on_room_updated_received(room: Dictionary) -> void:
 	var room_id := str(room.get("id", "")).strip_edges()
 	if room_id.is_empty():
 		return
-	if room_id != StateStore.current_room_id:
+	if room_id != _get_current_room_id():
 		return
+	_sync_game_state_from_room(room)
 
 func _on_game_state_updated_received(state: Dictionary) -> void:
 	StateStore.set_game_state(state)
+
+func _sync_game_state_from_room(room: Dictionary) -> void:
+	var current_state := StateStore.game_state
+	var next_state: Dictionary
+	if current_state.is_empty():
+		next_state = SharedGameState.create_from_room(room)
+	else:
+		next_state = SharedGameState.sync_from_room(current_state, room)
+	StateStore.set_game_state(next_state)
+
+func _get_current_room_id() -> String:
+	return str(StateStore.game_state.get("room_id", "")).strip_edges()
 
 func _get_string_arg(flag: String, default_value: String) -> String:
 	for arg in OS.get_cmdline_user_args():
