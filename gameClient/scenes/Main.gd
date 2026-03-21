@@ -3,6 +3,7 @@ extends Node2D
 const LOGIN_SCENE := "res://scenes/Login.tscn"
 const ROOM_LIST_SCENE := "res://scenes/RoomList.tscn"
 const ROOM_SCENE := "res://scenes/Room.tscn"
+const GAME_SCENE := "res://scenes/Game.tscn"
 
 @onready var scene_root: CanvasLayer = $SceneRoot
 
@@ -24,6 +25,8 @@ func _unhandled_input(event: InputEvent) -> void:
 func _get_initial_scene() -> String:
 	if AuthManager.auth_status == "authenticated":
 		if not str(SessionFlowManager.game_state.get("room_id", "")).strip_edges().is_empty():
+			if str(SessionFlowManager.game_state.get("phase", "")).strip_edges() == "playing":
+				return GAME_SCENE
 			return ROOM_SCENE
 		return ROOM_LIST_SCENE
 	return LOGIN_SCENE

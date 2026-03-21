@@ -3,6 +3,7 @@ extends Node
 const SharedGameState := preload("res://../shared/game_state.gd")
 
 var _room_game_states: Dictionary = {}
+var _pending_round_start_rooms: Dictionary = {}
 
 @rpc("any_peer", "call_remote", "reliable")
 func submit_button_states(states: Dictionary) -> void:
@@ -122,7 +123,9 @@ func leave_room(room_id: String) -> void:
 
 	print("Peer %d (%s) left room %s" % [peer_id, username, normalized_room_id])
 	ClientRpc.rpc_id(peer_id, "game_state_updated", {})
-	_broadcast_game_state_update(_sync_game_state_for_room(room))
+	var next_state := _sync_game_state_for_room(room)
+	if not next_state.is_empty():
+		_broadcast_game_state_update(next_state)
 	_broadcast_room_list()
 
 @rpc("any_peer", "call_remote", "reliable")
@@ -149,6 +152,7 @@ func set_player_ready(is_ready: bool) -> void:
 	_room_game_states[room_id] = next_state
 	print("Peer %d (%s) set ready=%s in %s" % [peer_id, username, str(is_ready), room_id])
 	_broadcast_game_state_update(next_state.duplicate(true))
+	_queue_round_start_if_ready(room_id, next_state)
 
 @rpc("any_peer", "call_remote", "reliable")
 func logout() -> void:
@@ -190,13 +194,16 @@ func _broadcast_game_state_update(state: Dictionary) -> void:
 	if room_id.is_empty():
 		return
 
-	var players: Array = state.get("players", [])
+	var room := RoomService.get_room_by_id(room_id)
+	if room.is_empty():
+		return
+
+	var members: Array = room.get("members", [])
 	var member_peer_ids: Array[int] = []
 	for peer_id in SessionAuthService.get_authenticated_peer_ids():
 		var username := SessionAuthService.get_authenticated_username(peer_id)
-		for player_variant in players:
-			var player := player_variant as Dictionary
-			if str(player.get("username", "")).strip_edges() != username:
+		for member_variant in members:
+			if str(member_variant).strip_edges() != username:
 				continue
 			member_peer_ids.append(peer_id)
 			break
@@ -210,6 +217,12 @@ func _sync_game_state_for_room(room: Dictionary) -> Dictionary:
 	if room_id.is_empty():
 		return {}
 
+	var members: Array = room.get("members", [])
+	if members.is_empty():
+		_room_game_states.erase(room_id)
+		_pending_round_start_rooms.erase(room_id)
+		return {}
+
 	var current_state: Dictionary = _room_game_states.get(room_id, {})
 	var next_state: Dictionary
 	if current_state.is_empty():
@@ -221,12 +234,35 @@ func _sync_game_state_for_room(room: Dictionary) -> Dictionary:
 
 func _find_room_id_for_username(username: String) -> String:
 	var normalized_username := username.strip_edges()
-	for room_id_variant in _room_game_states.keys():
-		var room_id := str(room_id_variant).strip_edges()
-		var state: Dictionary = _room_game_states.get(room_id, {})
-		var players: Array = state.get("players", [])
-		for player_variant in players:
-			var player := player_variant as Dictionary
-			if str(player.get("username", "")).strip_edges() == normalized_username:
+	for room_variant in RoomService.get_rooms():
+		var room := room_variant as Dictionary
+		var room_id := str(room.get("id", "")).strip_edges()
+		var members: Array = room.get("members", [])
+		for member_variant in members:
+			if str(member_variant).strip_edges() == normalized_username:
 				return room_id
 	return ""
+
+func _queue_round_start_if_ready(room_id: String, state: Dictionary) -> void:
+	if str(state.get("phase", "")).strip_edges() != SharedGameState.PHASE_ALL_READY:
+		_pending_round_start_rooms.erase(room_id)
+		return
+	if _pending_round_start_rooms.has(room_id):
+		return
+
+	_pending_round_start_rooms[room_id] = true
+	_start_round_after_delay(room_id)
+
+func _start_round_after_delay(room_id: String) -> void:
+	await get_tree().create_timer(3.0).timeout
+	_pending_round_start_rooms.erase(room_id)
+
+	var current_state: Dictionary = _room_game_states.get(room_id, {})
+	if current_state.is_empty():
+		return
+	if str(current_state.get("phase", "")).strip_edges() != SharedGameState.PHASE_ALL_READY:
+		return
+
+	var next_state := SharedGameState.set_phase(current_state, SharedGameState.PHASE_PLAYING)
+	_room_game_states[room_id] = next_state
+	_broadcast_game_state_update(next_state.duplicate(true))

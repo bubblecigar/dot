@@ -1,7 +1,8 @@
 extends RefCounted
 
 const PHASE_WAITING := "waiting"
-const PHASE_INPUT := "input"
+const PHASE_ALL_READY := "all_ready"
+const PHASE_PLAYING := "playing"
 
 static func create_from_room(room: Dictionary) -> Dictionary:
 	return _build_state({}, room)
@@ -24,6 +25,11 @@ static func set_player_ready(state: Dictionary, username: String, is_ready: bool
 
 	next_state["players"] = updated_players
 	next_state["phase"] = _resolve_phase(updated_players)
+	return next_state
+
+static func set_phase(state: Dictionary, phase: String) -> Dictionary:
+	var next_state := state.duplicate(true)
+	next_state["phase"] = phase
 	return next_state
 
 static func _build_state(existing_state: Dictionary, room: Dictionary) -> Dictionary:
@@ -75,4 +81,4 @@ static func _resolve_phase(players: Array) -> String:
 		if not bool(player.get("is_ready", false)):
 			return PHASE_WAITING
 
-	return PHASE_INPUT
+	return PHASE_ALL_READY

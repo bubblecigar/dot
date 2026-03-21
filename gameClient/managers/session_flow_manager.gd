@@ -3,6 +3,7 @@ extends Node
 const LOGIN_SCENE_PATH := "res://scenes/Login.tscn"
 const ROOM_LIST_SCENE_PATH := "res://scenes/RoomList.tscn"
 const ROOM_SCENE_PATH := "res://scenes/Room.tscn"
+const GAME_SCENE_PATH := "res://scenes/Game.tscn"
 
 var game_state: Dictionary = {}
 var _logout_requested: bool = false
@@ -46,13 +47,23 @@ func _get_current_room_id() -> String:
 
 func _route_from_game_state(state: Dictionary) -> void:
 	var room_id := str(state.get("room_id", "")).strip_edges()
+	var phase := str(state.get("phase", "")).strip_edges()
 	var current_scene := SceneManager.get_current_scene()
 	if room_id.is_empty():
 		if _logout_requested:
 			_request_server_logout()
 			return
-		if current_scene != null and current_scene.scene_file_path == ROOM_SCENE_PATH and AuthManager.auth_status == "authenticated":
+		if current_scene != null and (
+			current_scene.scene_file_path == ROOM_SCENE_PATH
+			or current_scene.scene_file_path == GAME_SCENE_PATH
+		) and AuthManager.auth_status == "authenticated":
 			SceneManager.change_scene(ROOM_LIST_SCENE_PATH, true)
+		return
+
+	if phase == "playing":
+		if current_scene != null and current_scene.scene_file_path == GAME_SCENE_PATH:
+			return
+		SceneManager.change_scene(GAME_SCENE_PATH, true)
 		return
 
 	if current_scene != null and current_scene.scene_file_path == ROOM_SCENE_PATH:
