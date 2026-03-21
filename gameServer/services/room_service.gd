@@ -8,6 +8,7 @@ func create_room(owner_peer_id: int, owner_username: String) -> Dictionary:
 		"id": "room-%04d" % _next_room_id,
 		"owner_peer_id": owner_peer_id,
 		"owner_username": owner_username,
+		"members": [owner_username],
 	}
 	_next_room_id += 1
 	_rooms.append(room)
@@ -23,6 +24,20 @@ func get_room_by_id(room_id: String) -> Dictionary:
 	for room in _rooms:
 		if str(room.get("id", "")) == room_id:
 			return room.duplicate(true)
+	return {}
+
+func add_member_to_room(room_id: String, username: String) -> Dictionary:
+	for i in range(_rooms.size()):
+		var room: Dictionary = _rooms[i]
+		if str(room.get("id", "")) != room_id:
+			continue
+
+		var members: Array = room.get("members", [])
+		if not members.has(username):
+			members.append(username)
+			room["members"] = members
+			_rooms[i] = room
+		return room.duplicate(true)
 	return {}
 
 func remove_rooms_for_owner(owner_peer_id: int) -> void:

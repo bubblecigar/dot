@@ -92,6 +92,7 @@ func join_room(room_id: String) -> void:
 		return
 
 	print("Peer %d (%s) requested join for room %s" % [peer_id, username, normalized_room_id])
+	room = RoomService.add_member_to_room(normalized_room_id, username)
 	ClientRpc.rpc_id(peer_id, "room_joined", room)
 	print("Approved room join for peer %d (%s): %s" % [peer_id, username, normalized_room_id])
 

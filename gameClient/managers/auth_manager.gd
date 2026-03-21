@@ -155,6 +155,7 @@ func _on_room_joined_received(room: Dictionary) -> void:
 	if room_id.is_empty():
 		return
 	StateStore.set_current_room_id(room_id)
+	StateStore.set_current_room_members(room.get("members", []))
 	SceneManager.change_scene(ROOM_SCENE_PATH, true)
 
 func _get_string_arg(flag: String, default_value: String) -> String:
