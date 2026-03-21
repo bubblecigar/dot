@@ -1,5 +1,9 @@
 extends Node
 
+const SharedGameState := preload("res://../shared/game_state.gd")
+
+var _room_game_states: Dictionary = {}
+
 @rpc("any_peer", "call_remote", "reliable")
 func submit_button_states(states: Dictionary) -> void:
 	if not multiplayer.is_server():
@@ -74,6 +78,7 @@ func create_room() -> void:
 	ClientRpc.rpc_id(peer_id, "room_joined", room)
 	print("Sent room_joined to peer %d for %s" % [peer_id, str(room.get("id", ""))])
 	_broadcast_room_update(room)
+	_broadcast_game_state_update(_sync_game_state_for_room(room))
 	_broadcast_room_list()
 
 @rpc("any_peer", "call_remote", "reliable")
@@ -97,6 +102,7 @@ func join_room(room_id: String) -> void:
 	ClientRpc.rpc_id(peer_id, "room_joined", room)
 	print("Approved room join for peer %d (%s): %s" % [peer_id, username, normalized_room_id])
 	_broadcast_room_update(room)
+	_broadcast_game_state_update(_sync_game_state_for_room(room))
 	_broadcast_room_list()
 
 @rpc("any_peer", "call_remote", "reliable")
@@ -121,6 +127,7 @@ func leave_room(room_id: String) -> void:
 
 	print("Peer %d (%s) left room %s" % [peer_id, username, normalized_room_id])
 	_broadcast_room_update(room)
+	_broadcast_game_state_update(_sync_game_state_for_room(room))
 	_broadcast_room_list()
 
 func _reject_peer(peer_id: int, error: String) -> void:
@@ -158,3 +165,37 @@ func _broadcast_room_update(room: Dictionary) -> void:
 	print("Broadcasting room update for %s to %d peers" % [room_id, member_peer_ids.size()])
 	for peer_id in member_peer_ids:
 		ClientRpc.rpc_id(peer_id, "room_updated", room)
+
+func _broadcast_game_state_update(state: Dictionary) -> void:
+	var room_id := str(state.get("room_id", "")).strip_edges()
+	if room_id.is_empty():
+		return
+
+	var players: Array = state.get("players", [])
+	var member_peer_ids: Array[int] = []
+	for peer_id in SessionAuthService.get_authenticated_peer_ids():
+		var username := SessionAuthService.get_authenticated_username(peer_id)
+		for player_variant in players:
+			var player := player_variant as Dictionary
+			if str(player.get("username", "")).strip_edges() != username:
+				continue
+			member_peer_ids.append(peer_id)
+			break
+
+	print("Broadcasting game state for %s to %d peers" % [room_id, member_peer_ids.size()])
+	for peer_id in member_peer_ids:
+		ClientRpc.rpc_id(peer_id, "game_state_updated", state)
+
+func _sync_game_state_for_room(room: Dictionary) -> Dictionary:
+	var room_id := str(room.get("id", "")).strip_edges()
+	if room_id.is_empty():
+		return {}
+
+	var current_state: Dictionary = _room_game_states.get(room_id, {})
+	var next_state: Dictionary
+	if current_state.is_empty():
+		next_state = SharedGameState.create_from_room(room)
+	else:
+		next_state = SharedGameState.sync_from_room(current_state, room)
+	_room_game_states[room_id] = next_state
+	return next_state.duplicate(true)
