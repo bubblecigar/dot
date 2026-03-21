@@ -86,25 +86,6 @@ size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 32
 text = "Refresh Rooms"
 
-[node name="LogoutCard" type="PanelContainer" parent="MarginContainer/Grid"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Grid/LogoutCard"]
-layout_mode = 2
-theme_override_constants/margin_left = 24
-theme_override_constants/margin_top = 24
-theme_override_constants/margin_right = 24
-theme_override_constants/margin_bottom = 24
-
-[node name="LogoutButton" type="Button" parent="MarginContainer/Grid/LogoutCard/MarginContainer"]
-layout_mode = 2
-custom_minimum_size = Vector2(0, 72)
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 32
-text = "Logout"
-
 [node name="RoomsCard" type="PanelContainer" parent="MarginContainer/Grid"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -140,3 +121,22 @@ theme_override_font_sizes/font_size = 28
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
+
+[node name="LogoutCard" type="PanelContainer" parent="MarginContainer/Grid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Grid/LogoutCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="LogoutButton" type="Button" parent="MarginContainer/Grid/LogoutCard/MarginContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 72)
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+text = "Logout"
