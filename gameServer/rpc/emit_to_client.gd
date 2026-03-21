@@ -29,13 +29,6 @@ func room_joined(room: Dictionary) -> void:
 	rpc("room_joined", room)
 
 @rpc("authority", "call_remote", "reliable")
-func room_updated(room: Dictionary) -> void:
-	if multiplayer.multiplayer_peer == null:
-		return
-
-	rpc("room_updated", room)
-
-@rpc("authority", "call_remote", "reliable")
 func game_state_updated(state: Dictionary) -> void:
 	if multiplayer.multiplayer_peer == null:
 		return

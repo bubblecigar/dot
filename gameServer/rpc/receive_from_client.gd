@@ -77,7 +77,6 @@ func create_room() -> void:
 	print("Room created by peer %d (%s): %s" % [peer_id, username, str(room.get("id", ""))])
 	ClientRpc.rpc_id(peer_id, "room_joined", room)
 	print("Sent room_joined to peer %d for %s" % [peer_id, str(room.get("id", ""))])
-	_broadcast_room_update(room)
 	_broadcast_game_state_update(_sync_game_state_for_room(room))
 	_broadcast_room_list()
 
@@ -101,7 +100,6 @@ func join_room(room_id: String) -> void:
 	room = RoomService.add_member_to_room(normalized_room_id, username)
 	ClientRpc.rpc_id(peer_id, "room_joined", room)
 	print("Approved room join for peer %d (%s): %s" % [peer_id, username, normalized_room_id])
-	_broadcast_room_update(room)
 	_broadcast_game_state_update(_sync_game_state_for_room(room))
 	_broadcast_room_list()
 
@@ -126,7 +124,6 @@ func leave_room(room_id: String) -> void:
 		return
 
 	print("Peer %d (%s) left room %s" % [peer_id, username, normalized_room_id])
-	_broadcast_room_update(room)
 	_broadcast_game_state_update(_sync_game_state_for_room(room))
 	_broadcast_room_list()
 
@@ -148,23 +145,6 @@ func _broadcast_room_list() -> void:
 	print("Broadcasting room list to %d authenticated peers: %d rooms" % [peer_ids.size(), rooms.size()])
 	for peer_id in peer_ids:
 		ClientRpc.rpc_id(peer_id, "room_list", rooms)
-
-func _broadcast_room_update(room: Dictionary) -> void:
-	var room_id := str(room.get("id", "")).strip_edges()
-	if room_id.is_empty():
-		return
-
-	var members: Array = room.get("members", [])
-	var member_peer_ids: Array[int] = []
-	for peer_id in SessionAuthService.get_authenticated_peer_ids():
-		var username := SessionAuthService.get_authenticated_username(peer_id)
-		if not members.has(username):
-			continue
-		member_peer_ids.append(peer_id)
-
-	print("Broadcasting room update for %s to %d peers" % [room_id, member_peer_ids.size()])
-	for peer_id in member_peer_ids:
-		ClientRpc.rpc_id(peer_id, "room_updated", room)
 
 func _broadcast_game_state_update(state: Dictionary) -> void:
 	var room_id := str(state.get("room_id", "")).strip_edges()

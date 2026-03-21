@@ -22,8 +22,6 @@ func _ready() -> void:
 		ClientRpc.room_list_received.connect(_on_room_list_received)
 	if not ClientRpc.room_joined_received.is_connected(_on_room_joined_received):
 		ClientRpc.room_joined_received.connect(_on_room_joined_received)
-	if not ClientRpc.room_updated_received.is_connected(_on_room_updated_received):
-		ClientRpc.room_updated_received.connect(_on_room_updated_received)
 	if not ClientRpc.game_state_updated_received.is_connected(_on_game_state_updated_received):
 		ClientRpc.game_state_updated_received.connect(_on_game_state_updated_received)
 	_log_client_network_config()
@@ -179,14 +177,6 @@ func _on_room_joined_received(room: Dictionary) -> void:
 		return
 	_sync_game_state_from_room(room)
 	SceneManager.change_scene(ROOM_SCENE_PATH, true)
-
-func _on_room_updated_received(room: Dictionary) -> void:
-	var room_id := str(room.get("id", "")).strip_edges()
-	if room_id.is_empty():
-		return
-	if room_id != _get_current_room_id():
-		return
-	_sync_game_state_from_room(room)
 
 func _on_game_state_updated_received(state: Dictionary) -> void:
 	StateStore.set_game_state(state)
