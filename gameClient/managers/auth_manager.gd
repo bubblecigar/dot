@@ -4,6 +4,7 @@ const NetworkConfig := preload("res://shared/network_config.gd")
 const AuthApiClient := preload("res://shared/auth_api_client.gd")
 const GAME_CONNECT_TIMEOUT_MS := 3000
 const GAME_AUTH_TIMEOUT_MS := 3000
+const LOGIN_SCENE_PATH := "res://scenes/Login.tscn"
 const ROOM_SCENE_PATH := "res://scenes/Room.tscn"
 
 signal authenticated(username: String)
@@ -29,6 +30,22 @@ func login(email: String, password: String) -> Dictionary:
 
 func register(email: String, password: String) -> Dictionary:
 	return await _authenticate_and_connect("register", email, password)
+
+func logout() -> void:
+	if not StateStore.current_room_id.is_empty() and multiplayer.multiplayer_peer != null:
+		ServerRpc.leave_room(StateStore.current_room_id)
+
+	var peer := multiplayer.multiplayer_peer
+	multiplayer.multiplayer_peer = null
+	if peer != null:
+		peer.close()
+
+	_pending_game_auth_result = {}
+	_is_busy = false
+	StateStore.clear_room_data()
+	StateStore.clear_available_rooms()
+	StateStore.clear_auth_data()
+	SceneManager.change_scene(LOGIN_SCENE_PATH, false)
 
 func _authenticate_and_connect(action: String, email: String, password: String) -> Dictionary:
 	if _is_busy:

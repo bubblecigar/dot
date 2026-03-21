@@ -2,12 +2,14 @@ extends Control
 
 @onready var create_room_button: Button = $MarginContainer/Grid/CreateRoomCard/MarginContainer/CreateRoomButton
 @onready var refresh_button: Button = $MarginContainer/Grid/RefreshCard/MarginContainer/RefreshButton
+@onready var logout_button: Button = $MarginContainer/Grid/LogoutCard/MarginContainer/LogoutButton
 @onready var rooms_container: VBoxContainer = $MarginContainer/Grid/RoomsCard/MarginContainer/RoomsContainer
 @onready var status_label: Label = $MarginContainer/Grid/StatusCard/MarginContainer/StatusLabel
 
 func _ready() -> void:
 	create_room_button.pressed.connect(_on_create_room_pressed)
 	refresh_button.pressed.connect(_request_room_list)
+	logout_button.pressed.connect(_on_logout_pressed)
 	if not ClientRpc.room_list_received.is_connected(_on_room_list_received):
 		ClientRpc.room_list_received.connect(_on_room_list_received)
 	_render_room_list(StateStore.available_rooms)
@@ -25,6 +27,10 @@ func _on_create_room_pressed() -> void:
 func _request_room_list() -> void:
 	status_label.text = "Refreshing rooms..."
 	ServerRpc.request_room_list()
+
+func _on_logout_pressed() -> void:
+	status_label.text = "Logging out..."
+	AuthManager.logout()
 
 func _on_room_list_received(rooms: Array) -> void:
 	_render_room_list(rooms)

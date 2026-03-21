@@ -26,11 +26,21 @@ func set_auth_data(status: String, username: String, token: String) -> void:
 	auth_username = username
 	auth_token = token
 
+func clear_auth_data() -> void:
+	set_auth_data("unauthenticated", "", "")
+
 func set_available_rooms(rooms: Array) -> void:
 	available_rooms = rooms.duplicate(true)
+
+func clear_available_rooms() -> void:
+	available_rooms = []
 
 func set_current_room_id(room_id: String) -> void:
 	current_room_id = room_id.strip_edges()
 
 func set_current_room_members(members: Array) -> void:
 	current_room_members = members.duplicate(true)
+
+func clear_room_data() -> void:
+	set_current_room_id("")
+	set_current_room_members([])
