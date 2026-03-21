@@ -19,6 +19,12 @@ func get_rooms() -> Array:
 		rooms.append(room.duplicate(true))
 	return rooms
 
+func get_room_by_id(room_id: String) -> Dictionary:
+	for room in _rooms:
+		if str(room.get("id", "")) == room_id:
+			return room.duplicate(true)
+	return {}
+
 func remove_rooms_for_owner(owner_peer_id: int) -> void:
 	var removed_room_ids: PackedStringArray = []
 	var remaining_rooms: Array[Dictionary] = []

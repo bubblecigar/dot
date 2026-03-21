@@ -51,3 +51,13 @@ func create_room() -> void:
 		return
 
 	rpc_id(SERVER_PEER_ID, "create_room")
+
+@rpc("any_peer", "call_remote", "reliable")
+func join_room(room_id: String) -> void:
+	var peer := multiplayer.multiplayer_peer
+	if peer == null:
+		return
+	if peer.get_connection_status() != MultiplayerPeer.CONNECTION_CONNECTED:
+		return
+
+	rpc_id(SERVER_PEER_ID, "join_room", room_id)

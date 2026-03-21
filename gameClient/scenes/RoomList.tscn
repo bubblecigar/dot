@@ -106,10 +106,9 @@ theme_override_constants/margin_top = 24
 theme_override_constants/margin_right = 24
 theme_override_constants/margin_bottom = 24
 
-[node name="RoomsLabel" type="Label" parent="MarginContainer/Grid/RoomsCard/MarginContainer"]
+[node name="RoomsContainer" type="VBoxContainer" parent="MarginContainer/Grid/RoomsCard/MarginContainer"]
 layout_mode = 2
-text = "Rooms:\n- Loading..."
-autowrap_mode = 2
+theme_override_constants/separation = 12
 
 [node name="StatusCard" type="PanelContainer" parent="MarginContainer/Grid"]
 layout_mode = 2

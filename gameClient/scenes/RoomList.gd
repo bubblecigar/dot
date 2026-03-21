@@ -2,7 +2,7 @@ extends Control
 
 @onready var create_room_button: Button = $MarginContainer/Grid/CreateRoomCard/MarginContainer/CreateRoomButton
 @onready var refresh_button: Button = $MarginContainer/Grid/RefreshCard/MarginContainer/RefreshButton
-@onready var rooms_label: Label = $MarginContainer/Grid/RoomsCard/MarginContainer/RoomsLabel
+@onready var rooms_container: VBoxContainer = $MarginContainer/Grid/RoomsCard/MarginContainer/RoomsContainer
 @onready var status_label: Label = $MarginContainer/Grid/StatusCard/MarginContainer/StatusLabel
 
 func _ready() -> void:
@@ -31,14 +31,27 @@ func _on_room_list_received(rooms: Array) -> void:
 	status_label.text = "Rooms loaded: %d" % rooms.size()
 
 func _render_room_list(rooms: Array) -> void:
+	for child in rooms_container.get_children():
+		child.queue_free()
+
 	if rooms.is_empty():
-		rooms_label.text = "Rooms:\n- No rooms yet"
+		var empty_label := Label.new()
+		empty_label.text = "No rooms yet"
+		empty_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		rooms_container.add_child(empty_label)
 		return
 
-	var lines: PackedStringArray = ["Rooms:"]
 	for room_variant in rooms:
 		var room := room_variant as Dictionary
 		var room_id := str(room.get("id", "unknown"))
 		var owner := str(room.get("owner_username", "unknown"))
-		lines.append("- %s (owner: %s)" % [room_id, owner])
-	rooms_label.text = "\n".join(lines)
+		var room_button := Button.new()
+		room_button.custom_minimum_size = Vector2(0, 56)
+		room_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		room_button.text = "%s (owner: %s)" % [room_id, owner]
+		room_button.pressed.connect(_on_room_pressed.bind(room_id))
+		rooms_container.add_child(room_button)
+
+func _on_room_pressed(room_id: String) -> void:
+	status_label.text = "Joining %s..." % room_id
+	ServerRpc.join_room(room_id)
