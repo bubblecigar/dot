@@ -1,4 +1,6 @@
-[gd_scene format=3]
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/Game.gd" id="1_game"]
 
 [node name="Game" type="Control"]
 anchors_preset = 15
@@ -8,17 +10,201 @@ offset_left = 0.0
 offset_top = 0.0
 offset_right = 0.0
 offset_bottom = 0.0
+script = ExtResource("1_game")
 
-[node name="CenterContainer" type="CenterContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="."]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
+offset_left = 48.0
+offset_top = 48.0
+offset_right = -48.0
+offset_bottom = -48.0
 
-[node name="Label" type="Label" parent="CenterContainer"]
+[node name="Layout" type="VBoxContainer" parent="MarginContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 40
-text = "Game Scene"
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 22
+
+[node name="HeaderCard" type="PanelContainer" parent="MarginContainer/Layout"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Layout/HeaderCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 28
+
+[node name="HeaderLayout" type="VBoxContainer" parent="MarginContainer/Layout/HeaderCard/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/Layout/HeaderCard/MarginContainer/HeaderLayout"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "Build Your Character"
+
+[node name="HintLabel" type="Label" parent="MarginContainer/Layout/HeaderCard/MarginContainer/HeaderLayout"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "First choose the +1 cell in each row, then choose the -1 cell from the two remaining spots."
+autowrap_mode = 2
+
+[node name="PhaseLabel" type="Label" parent="MarginContainer/Layout/HeaderCard/MarginContainer/HeaderLayout"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Phase 1: choose the +1 slot in each row"
+autowrap_mode = 2
+
+[node name="RemainingLabel" type="Label" parent="MarginContainer/Layout/HeaderCard/MarginContainer/HeaderLayout"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Row 1: choose one slot for +1"
+autowrap_mode = 2
+
+[node name="RowsCard" type="PanelContainer" parent="MarginContainer/Layout"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Layout/RowsCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 28
+
+[node name="RowsLayout" type="VBoxContainer" parent="MarginContainer/Layout/RowsCard/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="Row1" type="HBoxContainer" parent="MarginContainer/Layout/RowsCard/MarginContainer/RowsLayout"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="RowLabel" type="Label" parent="MarginContainer/Layout/RowsCard/MarginContainer/RowsLayout/Row1"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Row 1"
+
+[node name="Slot1" type="Button" parent="MarginContainer/Layout/RowsCard/MarginContainer/RowsLayout/Row1"]
+custom_minimum_size = Vector2(140, 72)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 28
+text = "0"
+
+[node name="Slot2" type="Button" parent="MarginContainer/Layout/RowsCard/MarginContainer/RowsLayout/Row1"]
+custom_minimum_size = Vector2(140, 72)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 28
+text = "0"
+
+[node name="Slot3" type="Button" parent="MarginContainer/Layout/RowsCard/MarginContainer/RowsLayout/Row1"]
+custom_minimum_size = Vector2(140, 72)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 28
+text = "0"
+
+[node name="Row2" type="HBoxContainer" parent="MarginContainer/Layout/RowsCard/MarginContainer/RowsLayout"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="RowLabel" type="Label" parent="MarginContainer/Layout/RowsCard/MarginContainer/RowsLayout/Row2"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Row 2"
+
+[node name="Slot1" type="Button" parent="MarginContainer/Layout/RowsCard/MarginContainer/RowsLayout/Row2"]
+custom_minimum_size = Vector2(140, 72)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 28
+text = "0"
+
+[node name="Slot2" type="Button" parent="MarginContainer/Layout/RowsCard/MarginContainer/RowsLayout/Row2"]
+custom_minimum_size = Vector2(140, 72)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 28
+text = "0"
+
+[node name="Slot3" type="Button" parent="MarginContainer/Layout/RowsCard/MarginContainer/RowsLayout/Row2"]
+custom_minimum_size = Vector2(140, 72)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 28
+text = "0"
+
+[node name="Row3" type="HBoxContainer" parent="MarginContainer/Layout/RowsCard/MarginContainer/RowsLayout"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="RowLabel" type="Label" parent="MarginContainer/Layout/RowsCard/MarginContainer/RowsLayout/Row3"]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Row 3"
+
+[node name="Slot1" type="Button" parent="MarginContainer/Layout/RowsCard/MarginContainer/RowsLayout/Row3"]
+custom_minimum_size = Vector2(140, 72)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 28
+text = "0"
+
+[node name="Slot2" type="Button" parent="MarginContainer/Layout/RowsCard/MarginContainer/RowsLayout/Row3"]
+custom_minimum_size = Vector2(140, 72)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 28
+text = "0"
+
+[node name="Slot3" type="Button" parent="MarginContainer/Layout/RowsCard/MarginContainer/RowsLayout/Row3"]
+custom_minimum_size = Vector2(140, 72)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 28
+text = "0"
+
+[node name="SubmitCard" type="PanelContainer" parent="MarginContainer/Layout"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Layout/SubmitCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 28
+
+[node name="SubmitButton" type="Button" parent="MarginContainer/Layout/SubmitCard/MarginContainer"]
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 30
+text = "Confirm Setup"
+
+[node name="SummaryCard" type="PanelContainer" parent="MarginContainer/Layout"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Layout/SummaryCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 28
+
+[node name="SummaryLabel" type="Label" parent="MarginContainer/Layout/SummaryCard/MarginContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Phase 1: each row needs one +1 selection."
+autowrap_mode = 2
