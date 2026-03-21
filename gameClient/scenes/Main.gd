@@ -4,7 +4,7 @@ const LOGIN_SCENE := "res://scenes/Login.tscn"
 const ROOM_LIST_SCENE := "res://scenes/RoomList.tscn"
 const ROOM_SCENE := "res://scenes/Room.tscn"
 
-@onready var scene_root: Node2D = $SceneRoot
+@onready var scene_root: CanvasLayer = $SceneRoot
 
 func _ready() -> void:
 	SceneManager.initialize(scene_root)

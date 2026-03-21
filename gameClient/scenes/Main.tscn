@@ -1,11 +1,21 @@
 [gd_scene format=3 uid="uid://bxwlo53wph7x1"]
 
-[ext_resource type="Script" path="res://scenes/Main.gd" id="1_1dw2k"]
-[ext_resource type="PackedScene" path="res://scenes/DebugLayer.tscn" id="4_1pt13"]
+[ext_resource type="Script" uid="uid://8bxiflocc0wf" path="res://scenes/Main.gd" id="1_1dw2k"]
+[ext_resource type="PackedScene" uid="uid://bp57ij8ssl3ic" path="res://scenes/DebugLayer.tscn" id="4_1pt13"]
 
 [node name="abc" type="Node2D" unique_id=3931664]
 script = ExtResource("1_1dw2k")
 
-[node name="SceneRoot" type="Node2D" parent="."]
+[node name="SceneRoot" type="CanvasLayer" parent="." unique_id=1270429927]
 
-[node name="DebugLayer" parent="." instance=ExtResource("4_1pt13")]
+[node name="DebugBackground" type="ColorRect" parent="SceneRoot" unique_id=1818381356]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.18, 0.08, 0.08, 1)
+
+[node name="DebugLayer" parent="." unique_id=2006902374 instance=ExtResource("4_1pt13")]
