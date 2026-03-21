@@ -4,6 +4,7 @@ signal random_number_received(value: int)
 signal auth_result_received(result: Dictionary)
 signal room_list_received(rooms: Array)
 signal room_joined_received(room: Dictionary)
+signal room_updated_received(room: Dictionary)
 
 @rpc("authority", "call_remote", "reliable")
 func broadcast_random_number(value: int) -> void:
@@ -20,3 +21,7 @@ func room_list(rooms: Array) -> void:
 @rpc("authority", "call_remote", "reliable")
 func room_joined(room: Dictionary) -> void:
 	room_joined_received.emit(room)
+
+@rpc("authority", "call_remote", "reliable")
+func room_updated(room: Dictionary) -> void:
+	room_updated_received.emit(room)

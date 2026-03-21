@@ -40,6 +40,20 @@ func add_member_to_room(room_id: String, username: String) -> Dictionary:
 		return room.duplicate(true)
 	return {}
 
+func remove_member_from_room(room_id: String, username: String) -> Dictionary:
+	for i in range(_rooms.size()):
+		var room: Dictionary = _rooms[i]
+		if str(room.get("id", "")) != room_id:
+			continue
+
+		var members: Array = room.get("members", [])
+		if members.has(username):
+			members.erase(username)
+			room["members"] = members
+			_rooms[i] = room
+		return room.duplicate(true)
+	return {}
+
 func remove_rooms_for_owner(owner_peer_id: int) -> void:
 	var removed_room_ids: PackedStringArray = []
 	var remaining_rooms: Array[Dictionary] = []

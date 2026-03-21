@@ -20,6 +20,8 @@ func _ready() -> void:
 		ClientRpc.room_list_received.connect(_on_room_list_received)
 	if not ClientRpc.room_joined_received.is_connected(_on_room_joined_received):
 		ClientRpc.room_joined_received.connect(_on_room_joined_received)
+	if not ClientRpc.room_updated_received.is_connected(_on_room_updated_received):
+		ClientRpc.room_updated_received.connect(_on_room_updated_received)
 	_log_client_network_config()
 
 func login(email: String, password: String) -> Dictionary:
@@ -157,6 +159,14 @@ func _on_room_joined_received(room: Dictionary) -> void:
 	StateStore.set_current_room_id(room_id)
 	StateStore.set_current_room_members(room.get("members", []))
 	SceneManager.change_scene(ROOM_SCENE_PATH, true)
+
+func _on_room_updated_received(room: Dictionary) -> void:
+	var room_id := str(room.get("id", "")).strip_edges()
+	if room_id.is_empty():
+		return
+	if room_id != StateStore.current_room_id:
+		return
+	StateStore.set_current_room_members(room.get("members", []))
 
 func _get_string_arg(flag: String, default_value: String) -> String:
 	for arg in OS.get_cmdline_user_args():
