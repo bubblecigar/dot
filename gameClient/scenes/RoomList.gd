@@ -51,10 +51,11 @@ func _render_room_list(rooms: Array) -> void:
 		var room := room_variant as Dictionary
 		var room_id := str(room.get("id", "unknown"))
 		var owner := str(room.get("owner_username", "unknown"))
+		var phase := str(room.get("phase", "waiting"))
 		var room_button := Button.new()
 		room_button.custom_minimum_size = Vector2(0, 56)
 		room_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		room_button.text = "%s (owner: %s)" % [room_id, owner]
+		room_button.text = "%s (owner: %s, phase: %s)" % [room_id, owner, phase]
 		room_button.pressed.connect(_on_room_pressed.bind(room_id))
 		rooms_container.add_child(room_button)
 

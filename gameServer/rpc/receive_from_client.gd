@@ -58,7 +58,7 @@ func request_room_list() -> void:
 		return
 
 	var username := SessionAuthService.get_authenticated_username(peer_id)
-	var rooms := RoomService.get_rooms()
+	var rooms := _build_room_list_payload()
 	print(
 		"Room list requested by peer %d (%s): %d rooms"
 		% [peer_id, username, rooms.size()]
@@ -153,6 +153,7 @@ func set_player_ready(is_ready: bool) -> void:
 	_room_game_states[room_id] = next_state
 	print("Peer %d (%s) set ready=%s in %s" % [peer_id, username, str(is_ready), room_id])
 	_broadcast_game_state_update(next_state.duplicate(true))
+	_broadcast_room_list()
 	_queue_round_start_if_ready(room_id, next_state)
 
 @rpc("any_peer", "call_remote", "reliable")
@@ -184,7 +185,7 @@ func _disconnect_peer(peer_id: int) -> void:
 		(peer as ENetMultiplayerPeer).disconnect_peer(peer_id)
 
 func _broadcast_room_list() -> void:
-	var rooms := RoomService.get_rooms()
+	var rooms := _build_room_list_payload()
 	var peer_ids := SessionAuthService.get_authenticated_peer_ids()
 	print("Broadcasting room list to %d authenticated peers: %d rooms" % [peer_ids.size(), rooms.size()])
 	for peer_id in peer_ids:
@@ -267,6 +268,7 @@ func _start_round_after_delay(room_id: String) -> void:
 		var countdown_state := SharedGameState.set_transition_countdown(current_state, countdown)
 		_room_game_states[room_id] = countdown_state
 		_broadcast_game_state_update(countdown_state.duplicate(true))
+		_broadcast_room_list()
 		await get_tree().create_timer(1.0).timeout
 
 	_pending_round_start_rooms.erase(room_id)
@@ -281,9 +283,10 @@ func _start_round_after_delay(room_id: String) -> void:
 	next_state = SharedGameState.set_transition_countdown(next_state, 0)
 	_room_game_states[room_id] = next_state
 	_broadcast_game_state_update(next_state.duplicate(true))
+	_broadcast_room_list()
 
 func _sync_authenticated_peer_state(peer_id: int, username: String) -> void:
-	ClientRpc.rpc_id(peer_id, "room_list", RoomService.get_rooms())
+	ClientRpc.rpc_id(peer_id, "room_list", _build_room_list_payload())
 
 	var room_id := _find_room_id_for_username(username)
 	if room_id.is_empty():
@@ -297,3 +300,14 @@ func _sync_authenticated_peer_state(peer_id: int, username: String) -> void:
 
 	var state := _sync_game_state_for_room(room)
 	ClientRpc.rpc_id(peer_id, "game_state_updated", state)
+
+func _build_room_list_payload() -> Array:
+	var rooms: Array = []
+	for room_variant in RoomService.get_rooms():
+		var room := room_variant as Dictionary
+		var next_room := room.duplicate(true)
+		var room_id := str(next_room.get("id", "")).strip_edges()
+		var state: Dictionary = _room_game_states.get(room_id, {})
+		next_room["phase"] = str(state.get("phase", SharedGameState.PHASE_WAITING))
+		rooms.append(next_room)
+	return rooms
