@@ -19,8 +19,6 @@ func _exit_tree() -> void:
 
 func _on_back_pressed() -> void:
 	ServerRpc.leave_room(_get_room_id())
-	StateStore.clear_game_state()
-	SceneManager.change_scene(ROOM_LIST_SCENE_PATH, true)
 
 func _build_members_text() -> String:
 	var players: Array = _get_players()

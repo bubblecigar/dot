@@ -121,6 +121,7 @@ func leave_room(room_id: String) -> void:
 		return
 
 	print("Peer %d (%s) left room %s" % [peer_id, username, normalized_room_id])
+	ClientRpc.rpc_id(peer_id, "game_state_updated", {})
 	_broadcast_game_state_update(_sync_game_state_for_room(room))
 	_broadcast_room_list()
 

@@ -5,6 +5,7 @@ const AuthApiClient := preload("res://shared/auth_api_client.gd")
 const GAME_CONNECT_TIMEOUT_MS := 3000
 const GAME_AUTH_TIMEOUT_MS := 3000
 const LOGIN_SCENE_PATH := "res://scenes/Login.tscn"
+const ROOM_LIST_SCENE_PATH := "res://scenes/RoomList.tscn"
 const ROOM_SCENE_PATH := "res://scenes/Room.tscn"
 
 signal authenticated(username: String)
@@ -170,17 +171,19 @@ func _on_room_list_received(rooms: Array) -> void:
 
 func _on_game_state_updated_received(state: Dictionary) -> void:
 	StateStore.set_game_state(state)
-	_route_to_room_scene_if_needed(state)
+	_route_from_game_state(state)
 
 func _get_current_room_id() -> String:
 	return str(StateStore.game_state.get("room_id", "")).strip_edges()
 
-func _route_to_room_scene_if_needed(state: Dictionary) -> void:
+func _route_from_game_state(state: Dictionary) -> void:
 	var room_id := str(state.get("room_id", "")).strip_edges()
+	var current_scene := SceneManager.get_current_scene()
 	if room_id.is_empty():
+		if current_scene != null and current_scene.scene_file_path == ROOM_SCENE_PATH and StateStore.auth_status == "authenticated":
+			SceneManager.change_scene(ROOM_LIST_SCENE_PATH, true)
 		return
 
-	var current_scene := SceneManager.get_current_scene()
 	if current_scene != null and current_scene.scene_file_path == ROOM_SCENE_PATH:
 		return
 
