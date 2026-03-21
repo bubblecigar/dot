@@ -8,17 +8,25 @@ const GAME_AUTH_TIMEOUT_MS := 3000
 signal authenticated(username: String)
 signal authentication_failed(message: String)
 signal game_server_disconnected()
+signal game_server_reconnect_started()
+signal game_server_reconnected()
+signal session_invalidated(message: String)
 
 var auth_status: String = "unauthenticated"
 var auth_username: String = ""
 var auth_token: String = ""
 var _is_busy: bool = false
 var _pending_game_auth_result: Dictionary = {}
+var _logout_disconnect_expected: bool = false
+var _reconnect_in_progress: bool = false
+
+const RECONNECT_RETRY_DELAY_SEC := 2.0
 
 func _ready() -> void:
 	if not ClientRpc.auth_result_received.is_connected(_on_game_server_auth_result):
 		ClientRpc.auth_result_received.connect(_on_game_server_auth_result)
 	_log_client_network_config()
+	call_deferred("_restore_saved_session")
 
 func login(email: String, password: String) -> Dictionary:
 	return await _authenticate_and_connect("login", email, password)
@@ -63,6 +71,8 @@ func _authenticate_and_connect(action: String, email: String, password: String) 
 		str(connect_result.get("username", auth_username)),
 		auth_token,
 	)
+	LocalStore.set_saved_auth_session(auth_username, auth_token)
+	_logout_disconnect_expected = false
 	authenticated.emit(auth_username)
 	_is_busy = false
 	return {
@@ -125,6 +135,8 @@ func _on_server_disconnected() -> void:
 	print("Disconnected from ENet server")
 	multiplayer.multiplayer_peer = null
 	game_server_disconnected.emit()
+	if _should_auto_reconnect():
+		call_deferred("_run_reconnect_loop")
 
 func _wait_for_game_server_auth_result() -> Dictionary:
 	var deadline := Time.get_ticks_msec() + GAME_AUTH_TIMEOUT_MS
@@ -146,13 +158,102 @@ func _wait_for_game_server_auth_result() -> Dictionary:
 func _on_game_server_auth_result(result: Dictionary) -> void:
 	_pending_game_auth_result = result
 
+func prepare_for_logout_disconnect() -> void:
+	_logout_disconnect_expected = true
+
 func clear_auth_data() -> void:
+	_logout_disconnect_expected = false
+	_reconnect_in_progress = false
+	LocalStore.clear_saved_auth_session()
 	_set_auth_data("unauthenticated", "", "")
 
 func _set_auth_data(status: String, username: String, token: String) -> void:
 	auth_status = status
 	auth_username = username
 	auth_token = token
+
+func _restore_saved_session() -> void:
+	if _is_busy:
+		return
+	if not auth_token.is_empty():
+		return
+
+	var saved_token := LocalStore.saved_auth_token.strip_edges()
+	if saved_token.is_empty():
+		return
+
+	_is_busy = true
+	_set_auth_data(
+		"authenticating",
+		LocalStore.saved_auth_username.strip_edges(),
+		saved_token,
+	)
+
+	var connect_result := await _connect_to_game_server()
+	if not bool(connect_result.get("ok", false)):
+		_is_busy = false
+		if _is_fatal_reconnect_error(str(connect_result.get("error", ""))):
+			clear_auth_data()
+		else:
+			_set_auth_data("unauthenticated", "", "")
+		return
+
+	_set_auth_data(
+		"authenticated",
+		str(connect_result.get("username", auth_username)),
+		auth_token,
+	)
+	LocalStore.set_saved_auth_session(auth_username, auth_token)
+	_logout_disconnect_expected = false
+	_is_busy = false
+	authenticated.emit(auth_username)
+
+func _run_reconnect_loop() -> void:
+	if _reconnect_in_progress:
+		return
+	if not _should_auto_reconnect():
+		return
+
+	_reconnect_in_progress = true
+	game_server_reconnect_started.emit()
+
+	while _should_auto_reconnect():
+		var reconnect_result := await _connect_to_game_server()
+		if bool(reconnect_result.get("ok", false)):
+			_set_auth_data(
+				"authenticated",
+				str(reconnect_result.get("username", auth_username)),
+				auth_token,
+			)
+			_logout_disconnect_expected = false
+			_reconnect_in_progress = false
+			game_server_reconnected.emit()
+			return
+
+		var error := str(reconnect_result.get("error", "game_reconnect_failed"))
+		if _is_fatal_reconnect_error(error):
+			_reconnect_in_progress = false
+			clear_auth_data()
+			session_invalidated.emit(error)
+			return
+
+		await get_tree().create_timer(RECONNECT_RETRY_DELAY_SEC).timeout
+
+	_reconnect_in_progress = false
+
+func _should_auto_reconnect() -> bool:
+	return (
+		not _logout_disconnect_expected
+		and auth_status == "authenticated"
+		and not auth_token.is_empty()
+	)
+
+func _is_fatal_reconnect_error(error: String) -> bool:
+	return (
+		error == "missing_token"
+		or error == "invalid_token"
+		or error == "missing_username"
+	)
 
 func _get_string_arg(flag: String, default_value: String) -> String:
 	for arg in OS.get_cmdline_user_args():

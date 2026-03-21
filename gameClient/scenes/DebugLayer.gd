@@ -21,6 +21,9 @@ func _process(_delta: float) -> void:
 
 	var lines: PackedStringArray = [
 		"SessionFlowManager",
+		"auth_status: %s" % AuthManager.auth_status,
+		"auth_username: %s" % AuthManager.auth_username,
+		"auth_token: %s" % AuthManager.auth_token,
 		"server_random_number: %s" % _latest_random_number,
 		"current_scene: %s" % current_scene_name,
 	]

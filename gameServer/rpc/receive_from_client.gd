@@ -35,6 +35,7 @@ func authenticate(auth_data: Dictionary) -> void:
 		"ok": true,
 		"username": str(result.get("username", "")),
 	})
+	_sync_authenticated_peer_state(peer_id, str(result.get("username", "")))
 	print("Peer %d authenticated as %s" % [peer_id, str(result.get("username", ""))])
 
 @rpc("any_peer", "call_remote", "reliable")
@@ -280,3 +281,19 @@ func _start_round_after_delay(room_id: String) -> void:
 	next_state = SharedGameState.set_transition_countdown(next_state, 0)
 	_room_game_states[room_id] = next_state
 	_broadcast_game_state_update(next_state.duplicate(true))
+
+func _sync_authenticated_peer_state(peer_id: int, username: String) -> void:
+	ClientRpc.rpc_id(peer_id, "room_list", RoomService.get_rooms())
+
+	var room_id := _find_room_id_for_username(username)
+	if room_id.is_empty():
+		ClientRpc.rpc_id(peer_id, "game_state_updated", {})
+		return
+
+	var room := RoomService.get_room_by_id(room_id)
+	if room.is_empty():
+		ClientRpc.rpc_id(peer_id, "game_state_updated", {})
+		return
+
+	var state := _sync_game_state_for_room(room)
+	ClientRpc.rpc_id(peer_id, "game_state_updated", state)
