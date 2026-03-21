@@ -5,13 +5,11 @@ const ROOM_LIST_SCENE_PATH := "res://scenes/RoomList.tscn"
 @onready var room_id_label: Label = $MarginContainer/Grid/RoomIdCard/MarginContainer/RoomIdLabel
 @onready var members_label: Label = $MarginContainer/Grid/MembersCard/MarginContainer/MembersLabel
 @onready var back_button: Button = $MarginContainer/Grid/BackCard/MarginContainer/BackButton
-@onready var logout_button: Button = $MarginContainer/Grid/LogoutCard/MarginContainer/LogoutButton
 
 func _ready() -> void:
 	room_id_label.text = "Room ID: %s" % StateStore.current_room_id
 	members_label.text = _build_members_text()
 	back_button.pressed.connect(_on_back_pressed)
-	logout_button.pressed.connect(_on_logout_pressed)
 	if not ClientRpc.room_updated_received.is_connected(_on_room_updated_received):
 		ClientRpc.room_updated_received.connect(_on_room_updated_received)
 
@@ -23,9 +21,6 @@ func _on_back_pressed() -> void:
 	ServerRpc.leave_room(StateStore.current_room_id)
 	StateStore.clear_room_data()
 	SceneManager.change_scene(ROOM_LIST_SCENE_PATH, true)
-
-func _on_logout_pressed() -> void:
-	AuthManager.logout()
 
 func _build_members_text() -> String:
 	if StateStore.current_room_members.is_empty():
