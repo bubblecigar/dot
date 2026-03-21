@@ -61,6 +61,13 @@ func _on_slot_pressed(row_key: String, column_index: int) -> void:
 	_refresh_view()
 
 func _on_submit_pressed() -> void:
+	if _phase == PHASE_PICK_PLUS:
+		if not _is_phase_one_complete():
+			return
+		_phase = PHASE_PICK_MINUS
+		_refresh_view()
+		return
+
 	if not _is_valid_setup():
 		return
 	summary_label.text = "Ready to submit:\n%s" % JSON.stringify(_build_payload(), "\t")
@@ -77,8 +84,9 @@ func _refresh_view() -> void:
 
 	phase_label.text = _build_phase_text()
 	remaining_label.text = _build_remaining_text()
-	submit_button.disabled = not _is_valid_setup()
-	if not _is_valid_setup():
+	submit_button.text = _build_submit_text()
+	submit_button.disabled = _is_submit_disabled()
+	if submit_button.disabled:
 		summary_label.text = _build_summary_hint()
 
 func _build_remaining_text() -> String:
@@ -125,22 +133,8 @@ func _format_row_name(row_key: String) -> String:
 	return row_key.replace("_", " ").capitalize()
 
 func _update_phase() -> void:
-	var all_rows_have_plus := true
-	for row_key in ROW_KEYS:
-		var row_values: Array = _rows[row_key]
-		if _find_value_index(row_values, 1) < 0:
-			all_rows_have_plus = false
-			break
-
-	if not all_rows_have_plus:
-		_phase = PHASE_PICK_PLUS
+	if _phase == PHASE_PICK_PLUS:
 		return
-
-	for row_key in ROW_KEYS:
-		var row_values: Array = _rows[row_key]
-		if _find_value_index(row_values, -1) < 0:
-			_phase = PHASE_PICK_MINUS
-			return
 
 	_phase = PHASE_PICK_MINUS
 
@@ -155,12 +149,29 @@ func _is_button_disabled(value: int) -> bool:
 		return false
 	return value == 1
 
+func _is_phase_one_complete() -> bool:
+	for row_key in ROW_KEYS:
+		var row_values: Array = _rows[row_key]
+		if _find_value_index(row_values, 1) < 0:
+			return false
+	return true
+
+func _is_submit_disabled() -> bool:
+	if _phase == PHASE_PICK_PLUS:
+		return not _is_phase_one_complete()
+	return not _is_valid_setup()
+
+func _build_submit_text() -> String:
+	if _phase == PHASE_PICK_PLUS:
+		return "Continue to Phase 2"
+	return "Confirm Setup"
+
 func _build_phase_text() -> String:
 	if _phase == PHASE_PICK_PLUS:
-		return "Phase 1: choose the +1 slot in each row"
+		return "Phase 1: choose the +1 slot in each row, then submit"
 	return "Phase 2: choose the -1 slot from the two remaining cells"
 
 func _build_summary_hint() -> String:
 	if _phase == PHASE_PICK_PLUS:
-		return "Phase 1: each row needs one +1 selection."
+		return "Phase 1: each row needs one +1 selection before you continue."
 	return "Phase 2: the +1 cells are locked. Pick one -1 from the two remaining cells in each row."
