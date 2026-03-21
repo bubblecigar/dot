@@ -11,7 +11,7 @@ func _ready() -> void:
 		set_process(false)
 
 func _process(_delta: float) -> void:
-	var snapshot := StateStore.get_debug_snapshot()
+	var snapshot := SessionFlowManager.get_debug_snapshot()
 	var keys := snapshot.keys()
 	keys.sort()
 	var current_scene := SceneManager.get_current_scene()
@@ -20,7 +20,7 @@ func _process(_delta: float) -> void:
 		current_scene_name = "%s (%s)" % [current_scene.name, current_scene.scene_file_path]
 
 	var lines: PackedStringArray = [
-		"StateStore",
+		"SessionFlowManager",
 		"server_random_number: %s" % _latest_random_number,
 		"current_scene: %s" % current_scene_name,
 	]

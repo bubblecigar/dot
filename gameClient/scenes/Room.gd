@@ -39,9 +39,9 @@ func _on_game_state_updated_received(state: Dictionary) -> void:
 	members_label.text = _build_members_text()
 
 func _get_players() -> Array:
-	var state := StateStore.game_state
+	var state := SessionFlowManager.game_state
 	var players: Array = state.get("players", [])
 	return players
 
 func _get_room_id() -> String:
-	return str(StateStore.game_state.get("room_id", "")).strip_edges()
+	return str(SessionFlowManager.game_state.get("room_id", "")).strip_edges()

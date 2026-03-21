@@ -23,7 +23,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _get_initial_scene() -> String:
 	if AuthManager.auth_status == "authenticated":
-		if not str(StateStore.game_state.get("room_id", "")).strip_edges().is_empty():
+		if not str(SessionFlowManager.game_state.get("room_id", "")).strip_edges().is_empty():
 			return ROOM_SCENE
 		return ROOM_LIST_SCENE
 	return LOGIN_SCENE
