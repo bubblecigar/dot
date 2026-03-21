@@ -52,7 +52,11 @@ func _get_room_id() -> String:
 	return str(SessionFlowManager.game_state.get("room_id", "")).strip_edges()
 
 func _get_phase() -> String:
-	return str(SessionFlowManager.game_state.get("phase", "waiting")).strip_edges()
+	var phase := str(SessionFlowManager.game_state.get("phase", "waiting")).strip_edges()
+	var countdown := int(SessionFlowManager.game_state.get("transition_countdown", 0))
+	if phase == "all_ready" and countdown > 0:
+		return "%s (%d)" % [phase, countdown]
+	return phase
 
 func _is_current_player_ready() -> bool:
 	var current_username := AuthManager.auth_username.strip_edges()

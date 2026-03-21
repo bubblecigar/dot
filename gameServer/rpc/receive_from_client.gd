@@ -254,7 +254,20 @@ func _queue_round_start_if_ready(room_id: String, state: Dictionary) -> void:
 	_start_round_after_delay(room_id)
 
 func _start_round_after_delay(room_id: String) -> void:
-	await get_tree().create_timer(3.0).timeout
+	for countdown in [3, 2, 1]:
+		var current_state: Dictionary = _room_game_states.get(room_id, {})
+		if current_state.is_empty():
+			_pending_round_start_rooms.erase(room_id)
+			return
+		if str(current_state.get("phase", "")).strip_edges() != SharedGameState.PHASE_ALL_READY:
+			_pending_round_start_rooms.erase(room_id)
+			return
+
+		var countdown_state := SharedGameState.set_transition_countdown(current_state, countdown)
+		_room_game_states[room_id] = countdown_state
+		_broadcast_game_state_update(countdown_state.duplicate(true))
+		await get_tree().create_timer(1.0).timeout
+
 	_pending_round_start_rooms.erase(room_id)
 
 	var current_state: Dictionary = _room_game_states.get(room_id, {})
@@ -264,5 +277,6 @@ func _start_round_after_delay(room_id: String) -> void:
 		return
 
 	var next_state := SharedGameState.set_phase(current_state, SharedGameState.PHASE_PLAYING)
+	next_state = SharedGameState.set_transition_countdown(next_state, 0)
 	_room_game_states[room_id] = next_state
 	_broadcast_game_state_update(next_state.duplicate(true))

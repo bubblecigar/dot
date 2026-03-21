@@ -32,6 +32,11 @@ static func set_phase(state: Dictionary, phase: String) -> Dictionary:
 	next_state["phase"] = phase
 	return next_state
 
+static func set_transition_countdown(state: Dictionary, countdown_seconds: int) -> Dictionary:
+	var next_state := state.duplicate(true)
+	next_state["transition_countdown"] = countdown_seconds
+	return next_state
+
 static func _build_state(existing_state: Dictionary, room: Dictionary) -> Dictionary:
 	var next_state := existing_state.duplicate(true)
 	var room_id := str(room.get("id", "")).strip_edges()
@@ -43,9 +48,12 @@ static func _build_state(existing_state: Dictionary, room: Dictionary) -> Dictio
 	next_state["phase"] = str(existing_state.get("phase", PHASE_WAITING))
 	next_state["round"] = int(existing_state.get("round", 1))
 	next_state["turn"] = int(existing_state.get("turn", 0))
+	next_state["transition_countdown"] = int(existing_state.get("transition_countdown", 0))
 	var players := _build_players(existing_state.get("players", []), members)
 	next_state["players"] = players
 	next_state["phase"] = _resolve_phase(players)
+	if str(next_state.get("phase", PHASE_WAITING)) != PHASE_ALL_READY:
+		next_state["transition_countdown"] = 0
 	return next_state
 
 static func _build_players(existing_players_variant: Variant, members: Array) -> Array:
