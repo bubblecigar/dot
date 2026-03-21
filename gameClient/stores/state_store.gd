@@ -5,7 +5,6 @@ var auth_username: String = ""
 var auth_token: String = ""
 var available_rooms: Array = []
 var current_room_id: String = ""
-var current_room_members: Array = []
 var game_state: Dictionary = {}
 
 func get_debug_snapshot() -> Dictionary:
@@ -39,12 +38,8 @@ func clear_available_rooms() -> void:
 func set_current_room_id(room_id: String) -> void:
 	current_room_id = room_id.strip_edges()
 
-func set_current_room_members(members: Array) -> void:
-	current_room_members = members.duplicate(true)
-
 func clear_room_data() -> void:
 	set_current_room_id("")
-	set_current_room_members([])
 
 func set_game_state(state: Dictionary) -> void:
 	game_state = state.duplicate(true)

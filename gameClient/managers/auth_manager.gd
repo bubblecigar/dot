@@ -177,7 +177,6 @@ func _on_room_joined_received(room: Dictionary) -> void:
 	if room_id.is_empty():
 		return
 	StateStore.set_current_room_id(room_id)
-	StateStore.set_current_room_members(room.get("members", []))
 	SceneManager.change_scene(ROOM_SCENE_PATH, true)
 
 func _on_room_updated_received(room: Dictionary) -> void:
@@ -186,21 +185,9 @@ func _on_room_updated_received(room: Dictionary) -> void:
 		return
 	if room_id != StateStore.current_room_id:
 		return
-	StateStore.set_current_room_members(room.get("members", []))
 
 func _on_game_state_updated_received(state: Dictionary) -> void:
 	StateStore.set_game_state(state)
-
-	var room_id := str(state.get("room_id", "")).strip_edges()
-	if room_id != StateStore.current_room_id:
-		return
-
-	var players: Array = state.get("players", [])
-	var members: Array = []
-	for player_variant in players:
-		var player := player_variant as Dictionary
-		members.append(str(player.get("username", "")))
-	StateStore.set_current_room_members(members)
 
 func _get_string_arg(flag: String, default_value: String) -> String:
 	for arg in OS.get_cmdline_user_args():
