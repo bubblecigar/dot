@@ -19,8 +19,6 @@ func _ready() -> void:
 		ClientRpc.auth_result_received.connect(_on_game_server_auth_result)
 	if not ClientRpc.room_list_received.is_connected(_on_room_list_received):
 		ClientRpc.room_list_received.connect(_on_room_list_received)
-	if not ClientRpc.room_joined_received.is_connected(_on_room_joined_received):
-		ClientRpc.room_joined_received.connect(_on_room_joined_received)
 	if not ClientRpc.game_state_updated_received.is_connected(_on_game_state_updated_received):
 		ClientRpc.game_state_updated_received.connect(_on_game_state_updated_received)
 	_log_client_network_config()
@@ -170,17 +168,23 @@ func _on_game_server_auth_result(result: Dictionary) -> void:
 func _on_room_list_received(rooms: Array) -> void:
 	StateStore.set_available_rooms(rooms)
 
-func _on_room_joined_received(room: Dictionary) -> void:
-	var room_id := str(room.get("id", "")).strip_edges()
-	if room_id.is_empty():
-		return
-	SceneManager.change_scene(ROOM_SCENE_PATH, true)
-
 func _on_game_state_updated_received(state: Dictionary) -> void:
 	StateStore.set_game_state(state)
+	_route_to_room_scene_if_needed(state)
 
 func _get_current_room_id() -> String:
 	return str(StateStore.game_state.get("room_id", "")).strip_edges()
+
+func _route_to_room_scene_if_needed(state: Dictionary) -> void:
+	var room_id := str(state.get("room_id", "")).strip_edges()
+	if room_id.is_empty():
+		return
+
+	var current_scene := SceneManager.get_current_scene()
+	if current_scene != null and current_scene.scene_file_path == ROOM_SCENE_PATH:
+		return
+
+	SceneManager.change_scene(ROOM_SCENE_PATH, true)
 
 func _get_string_arg(flag: String, default_value: String) -> String:
 	for arg in OS.get_cmdline_user_args():
