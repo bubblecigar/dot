@@ -3,7 +3,6 @@ extends Node
 var auth_status: String = "unauthenticated"
 var auth_username: String = ""
 var auth_token: String = ""
-var available_rooms: Array = []
 var game_state: Dictionary = {}
 
 func get_debug_snapshot() -> Dictionary:
@@ -27,12 +26,6 @@ func set_auth_data(status: String, username: String, token: String) -> void:
 
 func clear_auth_data() -> void:
 	set_auth_data("unauthenticated", "", "")
-
-func set_available_rooms(rooms: Array) -> void:
-	available_rooms = rooms.duplicate(true)
-
-func clear_available_rooms() -> void:
-	available_rooms = []
 
 func set_game_state(state: Dictionary) -> void:
 	game_state = state.duplicate(true)

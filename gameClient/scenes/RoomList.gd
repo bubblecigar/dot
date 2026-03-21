@@ -12,7 +12,7 @@ func _ready() -> void:
 	logout_button.pressed.connect(_on_logout_pressed)
 	if not ClientRpc.room_list_received.is_connected(_on_room_list_received):
 		ClientRpc.room_list_received.connect(_on_room_list_received)
-	_render_room_list(StateStore.available_rooms)
+	_render_room_list([])
 	status_label.text = "Loading rooms..."
 	_request_room_list()
 

@@ -20,8 +20,6 @@ var _logout_disconnect_requested: bool = false
 func _ready() -> void:
 	if not ClientRpc.auth_result_received.is_connected(_on_game_server_auth_result):
 		ClientRpc.auth_result_received.connect(_on_game_server_auth_result)
-	if not ClientRpc.room_list_received.is_connected(_on_room_list_received):
-		ClientRpc.room_list_received.connect(_on_room_list_received)
 	if not ClientRpc.game_state_updated_received.is_connected(_on_game_state_updated_received):
 		ClientRpc.game_state_updated_received.connect(_on_game_state_updated_received)
 	_log_client_network_config()
@@ -173,9 +171,6 @@ func _wait_for_game_server_auth_result() -> Dictionary:
 func _on_game_server_auth_result(result: Dictionary) -> void:
 	_pending_game_auth_result = result
 
-func _on_room_list_received(rooms: Array) -> void:
-	StateStore.set_available_rooms(rooms)
-
 func _on_game_state_updated_received(state: Dictionary) -> void:
 	StateStore.set_game_state(state)
 	_route_from_game_state(state)
@@ -210,7 +205,6 @@ func _finalize_local_logout() -> void:
 	_is_busy = false
 	_logout_requested = false
 	_logout_disconnect_requested = false
-	StateStore.clear_available_rooms()
 	StateStore.clear_auth_data()
 	StateStore.clear_game_state()
 	SceneManager.change_scene(LOGIN_SCENE_PATH, false)
