@@ -125,6 +125,19 @@ func leave_room(room_id: String) -> void:
 	_broadcast_game_state_update(_sync_game_state_for_room(room))
 	_broadcast_room_list()
 
+@rpc("any_peer", "call_remote", "reliable")
+func logout() -> void:
+	if not multiplayer.is_server():
+		return
+	var peer_id := multiplayer.get_remote_sender_id()
+	if not SessionAuthService.is_peer_authenticated(peer_id):
+		print("Rejected logout from unauthenticated peer %d" % peer_id)
+		return
+
+	var username := SessionAuthService.get_authenticated_username(peer_id)
+	print("Peer %d (%s) requested logout" % [peer_id, username])
+	await _disconnect_peer(peer_id)
+
 func _reject_peer(peer_id: int, error: String) -> void:
 	SessionAuthService.clear_peer_auth(peer_id)
 	ClientRpc.rpc_id(peer_id, "auth_result", {
@@ -132,6 +145,9 @@ func _reject_peer(peer_id: int, error: String) -> void:
 		"error": error,
 	})
 	print("Rejected peer %d: %s" % [peer_id, error])
+	await _disconnect_peer(peer_id)
+
+func _disconnect_peer(peer_id: int) -> void:
 	await get_tree().process_frame
 	var peer := multiplayer.multiplayer_peer
 	if peer is ENetMultiplayerPeer:
