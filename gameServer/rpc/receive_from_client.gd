@@ -167,6 +167,40 @@ func set_player_ready(is_ready: bool) -> void:
 	_queue_round_start_if_ready(room_id, next_state)
 
 @rpc("any_peer", "call_remote", "reliable")
+func submit_character_setup(setup_data: Dictionary) -> void:
+	if not multiplayer.is_server():
+		return
+	var peer_id := multiplayer.get_remote_sender_id()
+	if not SessionAuthService.is_peer_authenticated(peer_id):
+		print("Rejected submit_character_setup from unauthenticated peer %d" % peer_id)
+		return
+
+	var username := SessionAuthService.get_authenticated_username(peer_id)
+	var room_id := _find_room_id_for_username(username)
+	if room_id.is_empty():
+		print("Rejected submit_character_setup for peer %d (%s): not in room" % [peer_id, username])
+		return
+
+	var current_state: Dictionary = _room_game_states.get(room_id, {})
+	if current_state.is_empty():
+		print("Rejected submit_character_setup for peer %d (%s): missing game state for %s" % [peer_id, username, room_id])
+		return
+
+	var current_phase := str(current_state.get("phase", "")).strip_edges()
+	var current_game_phase := str(current_state.get("game_phase", SharedGameState.GAME_PHASE_CHARACTER_SETUP)).strip_edges()
+	if current_phase != SharedGameState.PHASE_PLAYING or current_game_phase != SharedGameState.GAME_PHASE_CHARACTER_SETUP:
+		print(
+			"Rejected submit_character_setup for peer %d (%s): invalid phase %s/%s"
+			% [peer_id, username, current_phase, current_game_phase]
+		)
+		return
+
+	var next_state := SharedGameState.submit_player_setup(current_state, username, setup_data)
+	_room_game_states[room_id] = next_state
+	print("Peer %d (%s) submitted character setup in %s" % [peer_id, username, room_id])
+	_broadcast_game_state_update(next_state.duplicate(true))
+
+@rpc("any_peer", "call_remote", "reliable")
 func logout() -> void:
 	if not multiplayer.is_server():
 		return

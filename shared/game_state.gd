@@ -3,6 +3,8 @@ extends RefCounted
 const PHASE_WAITING := "waiting"
 const PHASE_ALL_READY := "all_ready"
 const PHASE_PLAYING := "playing"
+const GAME_PHASE_CHARACTER_SETUP := "character_setup"
+const GAME_PHASE_ROUND_ACTIVE := "round_active"
 
 static func create_from_room(room: Dictionary) -> Dictionary:
 	return _build_state({}, room)
@@ -62,6 +64,25 @@ static func set_transition_countdown(state: Dictionary, countdown_seconds: int) 
 	next_state["transition_countdown"] = countdown_seconds
 	return next_state
 
+static func submit_player_setup(state: Dictionary, username: String, setup_data: Dictionary) -> Dictionary:
+	var next_state := state.duplicate(true)
+	var normalized_username := username.strip_edges()
+	var players: Array = next_state.get("players", [])
+	var updated_players: Array = []
+
+	for player_variant in players:
+		var player := player_variant as Dictionary
+		var next_player := player.duplicate(true)
+		if str(next_player.get("username", "")).strip_edges() == normalized_username:
+			next_player["character_setup"] = setup_data.duplicate(true)
+			next_player["has_submitted_setup"] = true
+		updated_players.append(next_player)
+
+	next_state["players"] = updated_players
+	if _have_all_players_submitted_setup(updated_players):
+		next_state["game_phase"] = GAME_PHASE_ROUND_ACTIVE
+	return next_state
+
 static func _build_state(existing_state: Dictionary, room: Dictionary) -> Dictionary:
 	var next_state := existing_state.duplicate(true)
 	var room_id := str(room.get("id", "")).strip_edges()
@@ -71,6 +92,7 @@ static func _build_state(existing_state: Dictionary, room: Dictionary) -> Dictio
 	next_state["room_id"] = room_id
 	next_state["owner_username"] = owner_username
 	next_state["phase"] = str(existing_state.get("phase", PHASE_WAITING))
+	next_state["game_phase"] = str(existing_state.get("game_phase", GAME_PHASE_CHARACTER_SETUP))
 	next_state["round"] = int(existing_state.get("round", 1))
 	next_state["turn"] = int(existing_state.get("turn", 0))
 	next_state["transition_countdown"] = int(existing_state.get("transition_countdown", 0))
@@ -104,6 +126,8 @@ static func _build_players(existing_players_variant: Variant, members: Array) ->
 			"is_connected": is_connected,
 			"connection_state": "connected" if is_connected else "disconnected",
 			"is_ready": bool(existing_player.get("is_ready", false)),
+			"has_submitted_setup": bool(existing_player.get("has_submitted_setup", false)),
+			"character_setup": (existing_player.get("character_setup", {}) as Dictionary).duplicate(true),
 		})
 	return players
 
@@ -117,3 +141,14 @@ static func _resolve_phase(players: Array) -> String:
 			return PHASE_WAITING
 
 	return PHASE_ALL_READY
+
+static func _have_all_players_submitted_setup(players: Array) -> bool:
+	if players.is_empty():
+		return false
+
+	for player_variant in players:
+		var player := player_variant as Dictionary
+		if not bool(player.get("has_submitted_setup", false)):
+			return false
+
+	return true

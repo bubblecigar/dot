@@ -91,3 +91,13 @@ func set_player_ready(is_ready: bool) -> void:
 		return
 
 	rpc_id(SERVER_PEER_ID, "set_player_ready", is_ready)
+
+@rpc("any_peer", "call_remote", "reliable")
+func submit_character_setup(setup_data: Dictionary) -> void:
+	var peer := multiplayer.multiplayer_peer
+	if peer == null:
+		return
+	if peer.get_connection_status() != MultiplayerPeer.CONNECTION_CONNECTED:
+		return
+
+	rpc_id(SERVER_PEER_ID, "submit_character_setup", setup_data)
