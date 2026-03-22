@@ -96,6 +96,15 @@ func join_room(room_id: String) -> void:
 		print("Rejected room join for peer %d (%s): missing room %s" % [peer_id, username, normalized_room_id])
 		return
 
+	var current_state: Dictionary = _room_game_states.get(normalized_room_id, {})
+	var phase := str(current_state.get("phase", SharedGameState.PHASE_WAITING)).strip_edges()
+	if phase != SharedGameState.PHASE_WAITING:
+		print(
+			"Rejected room join for peer %d (%s): room %s is in phase %s"
+			% [peer_id, username, normalized_room_id, phase]
+		)
+		return
+
 	print("Peer %d (%s) requested join for room %s" % [peer_id, username, normalized_room_id])
 	room = RoomService.add_member_to_room(normalized_room_id, username)
 	print("Approved room join for peer %d (%s): %s" % [peer_id, username, normalized_room_id])
