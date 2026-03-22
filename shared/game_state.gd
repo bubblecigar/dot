@@ -42,6 +42,9 @@ static func set_player_connection_state(state: Dictionary, username: String, is_
 		updated_players.append(next_player)
 
 	next_state["players"] = updated_players
+	next_state["phase"] = _resolve_phase(updated_players)
+	if str(next_state.get("phase", PHASE_WAITING)) != PHASE_ALL_READY:
+		next_state["transition_countdown"] = 0
 	return next_state
 
 static func set_phase(state: Dictionary, phase: String) -> Dictionary:
@@ -105,6 +108,8 @@ static func _resolve_phase(players: Array) -> String:
 
 	for player_variant in players:
 		var player := player_variant as Dictionary
+		if not bool(player.get("is_connected", true)):
+			return PHASE_WAITING
 		if not bool(player.get("is_ready", false)):
 			return PHASE_WAITING
 

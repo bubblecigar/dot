@@ -339,4 +339,7 @@ func _set_player_connection_state(username: String, is_connected: bool) -> void:
 
 	var next_state := SharedGameState.set_player_connection_state(current_state, username, is_connected)
 	_room_game_states[room_id] = next_state
+	if not is_connected:
+		_pending_round_start_rooms.erase(room_id)
 	_broadcast_game_state_update(next_state.duplicate(true))
+	_broadcast_room_list()
