@@ -4,6 +4,8 @@ const PHASE_WAITING := "waiting"
 const PHASE_ALL_READY := "all_ready"
 const PHASE_PLAYING := "playing"
 const GAME_PHASE_CHARACTER_SETUP := "character_setup"
+const GAME_PHASE_ROUND_PICK := "round_pick"
+const GAME_PHASE_ROUND_RESULT := "round_result"
 const GAME_PHASE_ROUND_ACTIVE := "round_active"
 
 static func create_from_room(room: Dictionary) -> Dictionary:
@@ -94,8 +96,11 @@ static func _build_state(existing_state: Dictionary, room: Dictionary) -> Dictio
 	next_state["phase"] = str(existing_state.get("phase", PHASE_WAITING))
 	next_state["game_phase"] = str(existing_state.get("game_phase", GAME_PHASE_CHARACTER_SETUP))
 	next_state["round"] = int(existing_state.get("round", 1))
+	next_state["round_number"] = int(existing_state.get("round_number", 1))
 	next_state["turn"] = int(existing_state.get("turn", 0))
 	next_state["transition_countdown"] = int(existing_state.get("transition_countdown", 0))
+	next_state["round_results"] = _duplicate_array(existing_state.get("round_results", []))
+	next_state["winner_username"] = str(existing_state.get("winner_username", "")).strip_edges()
 	var players := _build_players(existing_state.get("players", []), members)
 	next_state["players"] = players
 	next_state["phase"] = _resolve_phase(players)
@@ -128,6 +133,9 @@ static func _build_players(existing_players_variant: Variant, members: Array) ->
 			"is_ready": bool(existing_player.get("is_ready", false)),
 			"has_submitted_setup": bool(existing_player.get("has_submitted_setup", false)),
 			"character_setup": (existing_player.get("character_setup", {}) as Dictionary).duplicate(true),
+			"has_submitted_pick": bool(existing_player.get("has_submitted_pick", false)),
+			"pick_matrix": (existing_player.get("pick_matrix", {}) as Dictionary).duplicate(true),
+			"hp": int(existing_player.get("hp", 10)),
 		})
 	return players
 
@@ -152,3 +160,8 @@ static func _have_all_players_submitted_setup(players: Array) -> bool:
 			return false
 
 	return true
+
+static func _duplicate_array(value: Variant) -> Array:
+	if value is Array:
+		return (value as Array).duplicate(true)
+	return []

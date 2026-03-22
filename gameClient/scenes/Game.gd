@@ -224,6 +224,14 @@ func _build_submission_status_text() -> String:
 	return "\n".join(lines)
 
 func _on_game_state_updated_received(_state: Dictionary) -> void:
+	print(
+		"Game scene state update user=%s game_phase=%s submitted=%s"
+		% [
+			AuthManager.auth_username,
+			_get_game_phase(),
+			str(_has_current_player_submitted_setup()),
+		]
+	)
 	_submit_pending = false
 	_apply_state_from_game_state()
 	_refresh_view()

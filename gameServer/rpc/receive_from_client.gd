@@ -197,7 +197,16 @@ func submit_character_setup(setup_data: Dictionary) -> void:
 
 	var next_state := SharedGameState.submit_player_setup(current_state, username, setup_data)
 	_room_game_states[room_id] = next_state
-	print("Peer %d (%s) submitted character setup in %s" % [peer_id, username, room_id])
+	print(
+		"Peer %d (%s) submitted character setup in %s; submissions=%s game_phase=%s"
+		% [
+			peer_id,
+			username,
+			room_id,
+			_build_setup_submission_summary(next_state),
+			str(next_state.get("game_phase", "")),
+		]
+	)
 	_broadcast_game_state_update(next_state.duplicate(true))
 
 @rpc("any_peer", "call_remote", "reliable")
@@ -282,6 +291,16 @@ func _sync_game_state_for_room(room: Dictionary) -> Dictionary:
 	else:
 		next_state = SharedGameState.sync_from_room(current_state, room)
 	_room_game_states[room_id] = next_state
+	print(
+		"Synced game state for %s phase=%s game_phase=%s round=%d submissions=%s"
+		% [
+			room_id,
+			str(next_state.get("phase", "")),
+			str(next_state.get("game_phase", "")),
+			int(next_state.get("round_number", 1)),
+			_build_setup_submission_summary(next_state),
+		]
+	)
 	return next_state.duplicate(true)
 
 func _find_room_id_for_username(username: String) -> String:
@@ -377,3 +396,17 @@ func _set_player_connection_state(username: String, is_connected: bool) -> void:
 		_pending_round_start_rooms.erase(room_id)
 	_broadcast_game_state_update(next_state.duplicate(true))
 	_broadcast_room_list()
+
+func _build_setup_submission_summary(state: Dictionary) -> String:
+	var parts: PackedStringArray = []
+	var players: Array = state.get("players", [])
+	for player_variant in players:
+		var player := player_variant as Dictionary
+		parts.append(
+			"%s=%s"
+			% [
+				str(player.get("username", "")),
+				"yes" if bool(player.get("has_submitted_setup", false)) else "no",
+			]
+		)
+	return ", ".join(parts)
