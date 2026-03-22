@@ -62,8 +62,8 @@ func _on_peer_connected(peer_id: int) -> void:
 
 func _on_peer_disconnected(peer_id: int) -> void:
 	var username := SessionAuthService.get_authenticated_username(peer_id)
-	ServerRpc.handle_peer_disconnected(username)
 	SessionAuthService.clear_peer_auth(peer_id)
+	ServerRpc.handle_peer_disconnected(username)
 	_players.erase(peer_id)
 	print("Peer disconnected: %d (remaining players: %d)" % [peer_id, _players.size()])
 
