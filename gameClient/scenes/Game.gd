@@ -4,8 +4,10 @@ const ROW_KEYS := ["row_1", "row_2", "row_3"]
 const PHASE_PICK_PLUS := 1
 const PHASE_PICK_MINUS := 2
 const GAME_PHASE_CHARACTER_SETUP := "character_setup"
-const GAME_PHASE_ROUND_ACTIVE := "round_active"
+const GAME_PHASE_ROUND_PICK := "round_pick"
 
+@onready var title_label: Label = $MarginContainer/Layout/HeaderCard/MarginContainer/HeaderLayout/TitleLabel
+@onready var hint_label: Label = $MarginContainer/Layout/HeaderCard/MarginContainer/HeaderLayout/HintLabel
 @onready var phase_label: Label = $MarginContainer/Layout/HeaderCard/MarginContainer/HeaderLayout/PhaseLabel
 @onready var remaining_label: Label = $MarginContainer/Layout/HeaderCard/MarginContainer/HeaderLayout/RemainingLabel
 @onready var submit_button: Button = $MarginContainer/Layout/SubmitCard/MarginContainer/SubmitButton
@@ -23,6 +25,7 @@ const GAME_PHASE_ROUND_ACTIVE := "round_active"
 
 var _row_buttons: Dictionary = {}
 var _rows: Dictionary = {}
+var _pick_rows: Dictionary = {}
 var _phase: int = PHASE_PICK_PLUS
 var _submit_pending: bool = false
 
@@ -33,6 +36,11 @@ func _ready() -> void:
 		"row_3": [row_3_slot_1, row_3_slot_2, row_3_slot_3],
 	}
 	_rows = {
+		"row_1": [0, 0, 0],
+		"row_2": [0, 0, 0],
+		"row_3": [0, 0, 0],
+	}
+	_pick_rows = {
 		"row_1": [0, 0, 0],
 		"row_2": [0, 0, 0],
 		"row_3": [0, 0, 0],
@@ -55,6 +63,14 @@ func _exit_tree() -> void:
 		ClientRpc.game_state_updated_received.disconnect(_on_game_state_updated_received)
 
 func _on_slot_pressed(row_key: String, column_index: int) -> void:
+	if _get_game_phase() == GAME_PHASE_ROUND_PICK:
+		var row_pick_values: Array = _pick_rows[row_key]
+		for index in range(row_pick_values.size()):
+			row_pick_values[index] = 1 if index == column_index else 0
+		_pick_rows[row_key] = row_pick_values
+		_refresh_view()
+		return
+
 	var row_values: Array = _rows[row_key]
 	if _phase == PHASE_PICK_PLUS:
 		for index in range(row_values.size()):
@@ -71,6 +87,12 @@ func _on_slot_pressed(row_key: String, column_index: int) -> void:
 	_refresh_view()
 
 func _on_submit_pressed() -> void:
+	if _get_game_phase() == GAME_PHASE_ROUND_PICK:
+		if not _is_valid_round_pick():
+			return
+		summary_label.text = "Round pick ready:\n%s" % JSON.stringify(_build_pick_payload(), "\t")
+		return
+
 	if _phase == PHASE_PICK_PLUS:
 		if not _is_phase_one_complete():
 			return
@@ -86,15 +108,17 @@ func _on_submit_pressed() -> void:
 	_refresh_view()
 
 func _refresh_view() -> void:
-	var setup_locked := _is_setup_locked()
+	var interaction_locked := _is_interaction_locked()
+	title_label.text = _build_title_text()
+	hint_label.text = _build_hint_text()
 	for row_key in ROW_KEYS:
 		var buttons: Array = _row_buttons[row_key]
-		var row_values: Array = _rows[row_key]
+		var row_values: Array = _pick_rows[row_key] if _get_game_phase() == GAME_PHASE_ROUND_PICK else _rows[row_key]
 		for index in range(buttons.size()):
 			var button := buttons[index] as Button
 			var value := int(row_values[index])
 			button.text = _format_value(value)
-			button.disabled = setup_locked or _is_button_disabled(value)
+			button.disabled = interaction_locked or _is_button_disabled(value)
 
 	phase_label.text = _build_phase_text()
 	remaining_label.text = _build_remaining_text()
@@ -112,11 +136,28 @@ func _is_valid_setup() -> bool:
 			return false
 	return true
 
+func _is_valid_round_pick() -> bool:
+	for row_key in ROW_KEYS:
+		var row_values: Array = _pick_rows[row_key]
+		var total := 0
+		for value_variant in row_values:
+			total += int(value_variant)
+		if total != 1:
+			return false
+	return true
+
 func _build_payload() -> Dictionary:
 	return {
 		"row_1": (_rows["row_1"] as Array).duplicate(),
 		"row_2": (_rows["row_2"] as Array).duplicate(),
 		"row_3": (_rows["row_3"] as Array).duplicate(),
+	}
+
+func _build_pick_payload() -> Dictionary:
+	return {
+		"row_1": (_pick_rows["row_1"] as Array).duplicate(),
+		"row_2": (_pick_rows["row_2"] as Array).duplicate(),
+		"row_3": (_pick_rows["row_3"] as Array).duplicate(),
 	}
 
 func _format_value(value: int) -> String:
@@ -140,6 +181,8 @@ func _find_value_index(row_values: Array, target: int) -> int:
 	return -1
 
 func _is_button_disabled(value: int) -> bool:
+	if _get_game_phase() == GAME_PHASE_ROUND_PICK:
+		return false
 	if _phase == PHASE_PICK_PLUS:
 		return false
 	return value == 1
@@ -154,6 +197,8 @@ func _is_phase_one_complete() -> bool:
 func _is_submit_disabled() -> bool:
 	if _submit_pending:
 		return true
+	if _get_game_phase() == GAME_PHASE_ROUND_PICK:
+		return not _is_valid_round_pick()
 	if _is_setup_locked():
 		return true
 	if _phase == PHASE_PICK_PLUS:
@@ -161,8 +206,8 @@ func _is_submit_disabled() -> bool:
 	return not _is_valid_setup()
 
 func _build_submit_text() -> String:
-	if _get_game_phase() == GAME_PHASE_ROUND_ACTIVE:
-		return "Next Phase Ready"
+	if _get_game_phase() == GAME_PHASE_ROUND_PICK:
+		return "Confirm Round Pick"
 	if _submit_pending:
 		return "Submitting..."
 	if _has_current_player_submitted_setup():
@@ -172,8 +217,8 @@ func _build_submit_text() -> String:
 	return "Confirm Setup"
 
 func _build_phase_text() -> String:
-	if _get_game_phase() == GAME_PHASE_ROUND_ACTIVE:
-		return "Next Phase: all setups submitted"
+	if _get_game_phase() == GAME_PHASE_ROUND_PICK:
+		return "Round Pick: choose one cell per row"
 	if _has_current_player_submitted_setup():
 		return "Character setup submitted"
 	if _phase == PHASE_PICK_PLUS:
@@ -181,8 +226,8 @@ func _build_phase_text() -> String:
 	return "Phase 2: choose the -1 slot from the two remaining cells"
 
 func _build_summary_hint() -> String:
-	if _get_game_phase() == GAME_PHASE_ROUND_ACTIVE:
-		return "All players submitted. Server advanced to the next phase."
+	if _get_game_phase() == GAME_PHASE_ROUND_PICK:
+		return "Pick one cell in each row for this round."
 	if _submit_pending:
 		return "Submitting your character setup to the server..."
 	if _has_current_player_submitted_setup():
@@ -192,8 +237,8 @@ func _build_summary_hint() -> String:
 	return "Phase 2: the +1 cells are locked. Pick one -1 from the two remaining cells in each row."
 
 func _build_remaining_text() -> String:
-	if _get_game_phase() == GAME_PHASE_ROUND_ACTIVE:
-		return _build_submission_status_text()
+	if _get_game_phase() == GAME_PHASE_ROUND_PICK:
+		return _build_round_pick_status_text()
 	if _has_current_player_submitted_setup():
 		return _build_submission_status_text()
 
@@ -223,6 +268,17 @@ func _build_submission_status_text() -> String:
 		lines.append("- %s: %s" % [str(player.get("username", "")), status])
 	return "\n".join(lines)
 
+func _build_round_pick_status_text() -> String:
+	var parts: PackedStringArray = []
+	for row_key in ROW_KEYS:
+		var row_values: Array = _pick_rows[row_key]
+		var selected_index := _find_value_index(row_values, 1)
+		if selected_index >= 0:
+			parts.append("%s: picked slot %d" % [_format_row_name(row_key), selected_index + 1])
+		else:
+			parts.append("%s: choose one slot" % _format_row_name(row_key))
+	return "\n".join(parts)
+
 func _on_game_state_updated_received(_state: Dictionary) -> void:
 	print(
 		"Game scene state update user=%s game_phase=%s submitted=%s"
@@ -237,6 +293,10 @@ func _on_game_state_updated_received(_state: Dictionary) -> void:
 	_refresh_view()
 
 func _apply_state_from_game_state() -> void:
+	if _get_game_phase() == GAME_PHASE_ROUND_PICK:
+		_phase = PHASE_PICK_PLUS
+		return
+
 	var setup := _get_current_player_setup()
 	if setup.is_empty():
 		return
@@ -272,4 +332,19 @@ func _has_current_player_submitted_setup() -> bool:
 	return bool(_get_current_player().get("has_submitted_setup", false))
 
 func _is_setup_locked() -> bool:
-	return _get_game_phase() == GAME_PHASE_ROUND_ACTIVE or _has_current_player_submitted_setup()
+	return _get_game_phase() == GAME_PHASE_ROUND_PICK or _has_current_player_submitted_setup()
+
+func _is_interaction_locked() -> bool:
+	if _get_game_phase() == GAME_PHASE_ROUND_PICK:
+		return false
+	return _is_setup_locked()
+
+func _build_title_text() -> String:
+	if _get_game_phase() == GAME_PHASE_ROUND_PICK:
+		return "Pick Your Round Actions"
+	return "Build Your Character"
+
+func _build_hint_text() -> String:
+	if _get_game_phase() == GAME_PHASE_ROUND_PICK:
+		return "Choose exactly one cell in each row. This round-pick matrix is separate from your character setup."
+	return "First choose the +1 cell in each row, then choose the -1 cell from the two remaining spots."

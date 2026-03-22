@@ -6,7 +6,6 @@ const PHASE_PLAYING := "playing"
 const GAME_PHASE_CHARACTER_SETUP := "character_setup"
 const GAME_PHASE_ROUND_PICK := "round_pick"
 const GAME_PHASE_ROUND_RESULT := "round_result"
-const GAME_PHASE_ROUND_ACTIVE := "round_active"
 
 static func create_from_room(room: Dictionary) -> Dictionary:
 	return _build_state({}, room)
@@ -82,7 +81,7 @@ static func submit_player_setup(state: Dictionary, username: String, setup_data:
 
 	next_state["players"] = updated_players
 	if _have_all_players_submitted_setup(updated_players):
-		next_state["game_phase"] = GAME_PHASE_ROUND_ACTIVE
+		next_state["game_phase"] = GAME_PHASE_ROUND_PICK
 	return next_state
 
 static func _build_state(existing_state: Dictionary, room: Dictionary) -> Dictionary:
