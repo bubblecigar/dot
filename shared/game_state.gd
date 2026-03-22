@@ -39,6 +39,8 @@ static func set_player_connection_state(state: Dictionary, username: String, is_
 		if str(next_player.get("username", "")).strip_edges() == normalized_username:
 			next_player["is_connected"] = is_connected
 			next_player["connection_state"] = "connected" if is_connected else "disconnected"
+			if not is_connected:
+				next_player["is_ready"] = false
 		updated_players.append(next_player)
 
 	next_state["players"] = updated_players
