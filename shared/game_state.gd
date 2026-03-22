@@ -27,6 +27,23 @@ static func set_player_ready(state: Dictionary, username: String, is_ready: bool
 	next_state["phase"] = _resolve_phase(updated_players)
 	return next_state
 
+static func set_player_connection_state(state: Dictionary, username: String, is_connected: bool) -> Dictionary:
+	var next_state := state.duplicate(true)
+	var normalized_username := username.strip_edges()
+	var players: Array = next_state.get("players", [])
+	var updated_players: Array = []
+
+	for player_variant in players:
+		var player := player_variant as Dictionary
+		var next_player := player.duplicate(true)
+		if str(next_player.get("username", "")).strip_edges() == normalized_username:
+			next_player["is_connected"] = is_connected
+			next_player["connection_state"] = "connected" if is_connected else "disconnected"
+		updated_players.append(next_player)
+
+	next_state["players"] = updated_players
+	return next_state
+
 static func set_phase(state: Dictionary, phase: String) -> Dictionary:
 	var next_state := state.duplicate(true)
 	next_state["phase"] = phase
@@ -73,9 +90,11 @@ static func _build_players(existing_players_variant: Variant, members: Array) ->
 			continue
 
 		var existing_player: Dictionary = existing_by_username.get(username, {})
+		var is_connected := bool(existing_player.get("is_connected", true))
 		players.append({
 			"username": username,
-			"is_connected": true,
+			"is_connected": is_connected,
+			"connection_state": "connected" if is_connected else "disconnected",
 			"is_ready": bool(existing_player.get("is_ready", false)),
 		})
 	return players

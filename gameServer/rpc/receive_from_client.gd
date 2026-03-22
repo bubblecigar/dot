@@ -35,6 +35,7 @@ func authenticate(auth_data: Dictionary) -> void:
 		"ok": true,
 		"username": str(result.get("username", "")),
 	})
+	_set_player_connection_state(str(result.get("username", "")), true)
 	_sync_authenticated_peer_state(peer_id, str(result.get("username", "")))
 	print("Peer %d authenticated as %s" % [peer_id, str(result.get("username", ""))])
 
@@ -178,6 +179,12 @@ func logout() -> void:
 	print("Peer %d (%s) requested logout" % [peer_id, username])
 	await _disconnect_peer(peer_id)
 
+func handle_peer_disconnected(username: String) -> void:
+	var normalized_username := username.strip_edges()
+	if normalized_username.is_empty():
+		return
+	_set_player_connection_state(normalized_username, false)
+
 func _reject_peer(peer_id: int, error: String) -> void:
 	SessionAuthService.clear_peer_auth(peer_id)
 	ClientRpc.rpc_id(peer_id, "auth_result", {
@@ -320,3 +327,16 @@ func _build_room_list_payload() -> Array:
 		next_room["phase"] = str(state.get("phase", SharedGameState.PHASE_WAITING))
 		rooms.append(next_room)
 	return rooms
+
+func _set_player_connection_state(username: String, is_connected: bool) -> void:
+	var room_id := _find_room_id_for_username(username)
+	if room_id.is_empty():
+		return
+
+	var current_state: Dictionary = _room_game_states.get(room_id, {})
+	if current_state.is_empty():
+		return
+
+	var next_state := SharedGameState.set_player_connection_state(current_state, username, is_connected)
+	_room_game_states[room_id] = next_state
+	_broadcast_game_state_update(next_state.duplicate(true))

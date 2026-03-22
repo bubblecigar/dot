@@ -34,7 +34,8 @@ func _build_members_text() -> String:
 	for player_variant in players:
 		var player := player_variant as Dictionary
 		var ready_status := "ready" if bool(player.get("is_ready", false)) else "waiting"
-		lines.append("- %s (%s)" % [str(player.get("username", "")), ready_status])
+		var connection_state := str(player.get("connection_state", "connected")).strip_edges()
+		lines.append("- %s (%s, %s)" % [str(player.get("username", "")), ready_status, connection_state])
 	return "\n".join(lines)
 
 func _on_game_state_updated_received(state: Dictionary) -> void:
