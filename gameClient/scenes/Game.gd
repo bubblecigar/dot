@@ -28,6 +28,7 @@ var _rows: Dictionary = {}
 var _pick_rows: Dictionary = {}
 var _phase: int = PHASE_PICK_PLUS
 var _submit_pending: bool = false
+var _pick_submit_pending: bool = false
 
 func _ready() -> void:
 	_row_buttons = {
@@ -90,7 +91,10 @@ func _on_submit_pressed() -> void:
 	if _get_game_phase() == GAME_PHASE_ROUND_PICK:
 		if not _is_valid_round_pick():
 			return
-		summary_label.text = "Round pick ready:\n%s" % JSON.stringify(_build_pick_payload(), "\t")
+		_pick_submit_pending = true
+		ServerRpc.submit_round_pick(_build_pick_payload())
+		summary_label.text = "Submitting round pick to the server..."
+		_refresh_view()
 		return
 
 	if _phase == PHASE_PICK_PLUS:
@@ -198,6 +202,8 @@ func _is_submit_disabled() -> bool:
 	if _submit_pending:
 		return true
 	if _get_game_phase() == GAME_PHASE_ROUND_PICK:
+		if _pick_submit_pending or _has_current_player_submitted_pick():
+			return true
 		return not _is_valid_round_pick()
 	if _is_setup_locked():
 		return true
@@ -207,6 +213,10 @@ func _is_submit_disabled() -> bool:
 
 func _build_submit_text() -> String:
 	if _get_game_phase() == GAME_PHASE_ROUND_PICK:
+		if _pick_submit_pending:
+			return "Submitting..."
+		if _has_current_player_submitted_pick():
+			return "Submitted"
 		return "Confirm Round Pick"
 	if _submit_pending:
 		return "Submitting..."
@@ -218,6 +228,8 @@ func _build_submit_text() -> String:
 
 func _build_phase_text() -> String:
 	if _get_game_phase() == GAME_PHASE_ROUND_PICK:
+		if _has_current_player_submitted_pick():
+			return "Round Pick submitted"
 		return "Round Pick: choose one cell per row"
 	if _has_current_player_submitted_setup():
 		return "Character setup submitted"
@@ -227,6 +239,10 @@ func _build_phase_text() -> String:
 
 func _build_summary_hint() -> String:
 	if _get_game_phase() == GAME_PHASE_ROUND_PICK:
+		if _pick_submit_pending:
+			return "Submitting your round pick to the server..."
+		if _has_current_player_submitted_pick():
+			return "Waiting for the other players to submit their round picks."
 		return "Pick one cell in each row for this round."
 	if _submit_pending:
 		return "Submitting your character setup to the server..."
@@ -238,6 +254,8 @@ func _build_summary_hint() -> String:
 
 func _build_remaining_text() -> String:
 	if _get_game_phase() == GAME_PHASE_ROUND_PICK:
+		if _has_current_player_submitted_pick():
+			return _build_pick_submission_status_text()
 		return _build_round_pick_status_text()
 	if _has_current_player_submitted_setup():
 		return _build_submission_status_text()
@@ -279,22 +297,37 @@ func _build_round_pick_status_text() -> String:
 			parts.append("%s: choose one slot" % _format_row_name(row_key))
 	return "\n".join(parts)
 
+func _build_pick_submission_status_text() -> String:
+	var lines: PackedStringArray = ["Round Pick Submissions:"]
+	for player_variant in _get_players():
+		var player := player_variant as Dictionary
+		var status := "submitted" if bool(player.get("has_submitted_pick", false)) else "waiting"
+		lines.append("- %s: %s" % [str(player.get("username", "")), status])
+	return "\n".join(lines)
+
 func _on_game_state_updated_received(_state: Dictionary) -> void:
 	print(
-		"Game scene state update user=%s game_phase=%s submitted=%s"
+		"Game scene state update user=%s game_phase=%s setup_submitted=%s pick_submitted=%s"
 		% [
 			AuthManager.auth_username,
 			_get_game_phase(),
 			str(_has_current_player_submitted_setup()),
+			str(_has_current_player_submitted_pick()),
 		]
 	)
 	_submit_pending = false
+	_pick_submit_pending = false
 	_apply_state_from_game_state()
 	_refresh_view()
 
 func _apply_state_from_game_state() -> void:
 	if _get_game_phase() == GAME_PHASE_ROUND_PICK:
 		_phase = PHASE_PICK_PLUS
+		var pick_matrix: Dictionary = _get_current_player_pick_matrix()
+		for row_key in ROW_KEYS:
+			var row_values_variant: Variant = pick_matrix.get(row_key, [0, 0, 0])
+			if row_values_variant is Array:
+				_pick_rows[row_key] = (row_values_variant as Array).duplicate()
 		return
 
 	var setup := _get_current_player_setup()
@@ -328,15 +361,21 @@ func _get_current_player() -> Dictionary:
 func _get_current_player_setup() -> Dictionary:
 	return (_get_current_player().get("character_setup", {}) as Dictionary).duplicate(true)
 
+func _get_current_player_pick_matrix() -> Dictionary:
+	return (_get_current_player().get("pick_matrix", {}) as Dictionary).duplicate(true)
+
 func _has_current_player_submitted_setup() -> bool:
 	return bool(_get_current_player().get("has_submitted_setup", false))
+
+func _has_current_player_submitted_pick() -> bool:
+	return bool(_get_current_player().get("has_submitted_pick", false))
 
 func _is_setup_locked() -> bool:
 	return _get_game_phase() == GAME_PHASE_ROUND_PICK or _has_current_player_submitted_setup()
 
 func _is_interaction_locked() -> bool:
 	if _get_game_phase() == GAME_PHASE_ROUND_PICK:
-		return false
+		return _pick_submit_pending or _has_current_player_submitted_pick()
 	return _is_setup_locked()
 
 func _build_title_text() -> String:

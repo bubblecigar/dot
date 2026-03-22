@@ -210,6 +210,52 @@ func submit_character_setup(setup_data: Dictionary) -> void:
 	_broadcast_game_state_update(next_state.duplicate(true))
 
 @rpc("any_peer", "call_remote", "reliable")
+func submit_round_pick(pick_matrix: Dictionary) -> void:
+	if not multiplayer.is_server():
+		return
+	var peer_id := multiplayer.get_remote_sender_id()
+	if not SessionAuthService.is_peer_authenticated(peer_id):
+		print("Rejected submit_round_pick from unauthenticated peer %d" % peer_id)
+		return
+
+	var username := SessionAuthService.get_authenticated_username(peer_id)
+	var room_id := _find_room_id_for_username(username)
+	if room_id.is_empty():
+		print("Rejected submit_round_pick for peer %d (%s): not in room" % [peer_id, username])
+		return
+
+	var current_state: Dictionary = _room_game_states.get(room_id, {})
+	if current_state.is_empty():
+		print("Rejected submit_round_pick for peer %d (%s): missing game state for %s" % [peer_id, username, room_id])
+		return
+
+	var current_phase := str(current_state.get("phase", "")).strip_edges()
+	var current_game_phase := str(current_state.get("game_phase", "")).strip_edges()
+	if current_phase != SharedGameState.PHASE_PLAYING or current_game_phase != SharedGameState.GAME_PHASE_ROUND_PICK:
+		print(
+			"Rejected submit_round_pick for peer %d (%s): invalid phase %s/%s"
+			% [peer_id, username, current_phase, current_game_phase]
+		)
+		return
+
+	if not _is_valid_pick_matrix(pick_matrix):
+		print("Rejected submit_round_pick for peer %d (%s): invalid pick matrix" % [peer_id, username])
+		return
+
+	var next_state := SharedGameState.submit_player_pick(current_state, username, pick_matrix)
+	_room_game_states[room_id] = next_state
+	print(
+		"Peer %d (%s) submitted round pick in %s; picks=%s"
+		% [
+			peer_id,
+			username,
+			room_id,
+			_build_pick_submission_summary(next_state),
+		]
+	)
+	_broadcast_game_state_update(next_state.duplicate(true))
+
+@rpc("any_peer", "call_remote", "reliable")
 func logout() -> void:
 	if not multiplayer.is_server():
 		return
@@ -397,6 +443,28 @@ func _set_player_connection_state(username: String, is_connected: bool) -> void:
 	_broadcast_game_state_update(next_state.duplicate(true))
 	_broadcast_room_list()
 
+func _is_valid_pick_matrix(pick_matrix: Dictionary) -> bool:
+	for row_key in ["row_1", "row_2", "row_3"]:
+		var row_variant: Variant = pick_matrix.get(row_key, [])
+		if not (row_variant is Array):
+			return false
+
+		var row_values: Array = row_variant as Array
+		if row_values.size() != 3:
+			return false
+
+		var total: int = 0
+		for value_variant in row_values:
+			var value: int = int(value_variant)
+			if value != 0 and value != 1:
+				return false
+			total += value
+
+		if total != 1:
+			return false
+
+	return true
+
 func _build_setup_submission_summary(state: Dictionary) -> String:
 	var parts: PackedStringArray = []
 	var players: Array = state.get("players", [])
@@ -407,6 +475,20 @@ func _build_setup_submission_summary(state: Dictionary) -> String:
 			% [
 				str(player.get("username", "")),
 				"yes" if bool(player.get("has_submitted_setup", false)) else "no",
+			]
+		)
+	return ", ".join(parts)
+
+func _build_pick_submission_summary(state: Dictionary) -> String:
+	var parts: PackedStringArray = []
+	var players: Array = state.get("players", [])
+	for player_variant in players:
+		var player := player_variant as Dictionary
+		parts.append(
+			"%s=%s"
+			% [
+				str(player.get("username", "")),
+				"yes" if bool(player.get("has_submitted_pick", false)) else "no",
 			]
 		)
 	return ", ".join(parts)

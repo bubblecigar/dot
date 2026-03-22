@@ -84,6 +84,23 @@ static func submit_player_setup(state: Dictionary, username: String, setup_data:
 		next_state["game_phase"] = GAME_PHASE_ROUND_PICK
 	return next_state
 
+static func submit_player_pick(state: Dictionary, username: String, pick_matrix: Dictionary) -> Dictionary:
+	var next_state := state.duplicate(true)
+	var normalized_username := username.strip_edges()
+	var players: Array = next_state.get("players", [])
+	var updated_players: Array = []
+
+	for player_variant in players:
+		var player := player_variant as Dictionary
+		var next_player := player.duplicate(true)
+		if str(next_player.get("username", "")).strip_edges() == normalized_username:
+			next_player["pick_matrix"] = pick_matrix.duplicate(true)
+			next_player["has_submitted_pick"] = true
+		updated_players.append(next_player)
+
+	next_state["players"] = updated_players
+	return next_state
+
 static func _build_state(existing_state: Dictionary, room: Dictionary) -> Dictionary:
 	var next_state := existing_state.duplicate(true)
 	var room_id := str(room.get("id", "")).strip_edges()

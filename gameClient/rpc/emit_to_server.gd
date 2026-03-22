@@ -101,3 +101,13 @@ func submit_character_setup(setup_data: Dictionary) -> void:
 		return
 
 	rpc_id(SERVER_PEER_ID, "submit_character_setup", setup_data)
+
+@rpc("any_peer", "call_remote", "reliable")
+func submit_round_pick(pick_matrix: Dictionary) -> void:
+	var peer := multiplayer.multiplayer_peer
+	if peer == null:
+		return
+	if peer.get_connection_status() != MultiplayerPeer.CONNECTION_CONNECTED:
+		return
+
+	rpc_id(SERVER_PEER_ID, "submit_round_pick", pick_matrix)
