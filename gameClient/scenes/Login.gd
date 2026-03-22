@@ -1,6 +1,7 @@
 extends Control
 
 const NEXT_SCENE_PATH := "res://scenes/RoomList.tscn"
+static var _init_login_consumed: bool = false
 
 @onready var email_input: LineEdit = $MarginContainer/Grid/EmailCard/MarginContainer/Layout/EmailInput
 @onready var password_input: LineEdit = $MarginContainer/Grid/PasswordCard/MarginContainer/Layout/PasswordInput
@@ -21,7 +22,8 @@ func _ready() -> void:
 	password_input.text_changed.connect(_on_credentials_changed)
 	status_label.text = "Enter your email and password."
 
-	if _has_init_credentials():
+	if _has_init_credentials() and not _init_login_consumed:
+		_init_login_consumed = true
 		email_input.text = _get_init_email()
 		password_input.text = _get_init_password()
 		status_label.text = "Auto logging in..."
