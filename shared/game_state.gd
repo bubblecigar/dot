@@ -30,6 +30,7 @@ static func set_player_ready(state: Dictionary, username: String, is_ready: bool
 static func set_player_connection_state(state: Dictionary, username: String, is_connected: bool) -> Dictionary:
 	var next_state := state.duplicate(true)
 	var normalized_username := username.strip_edges()
+	var current_phase := str(next_state.get("phase", PHASE_WAITING)).strip_edges()
 	var players: Array = next_state.get("players", [])
 	var updated_players: Array = []
 
@@ -39,11 +40,13 @@ static func set_player_connection_state(state: Dictionary, username: String, is_
 		if str(next_player.get("username", "")).strip_edges() == normalized_username:
 			next_player["is_connected"] = is_connected
 			next_player["connection_state"] = "connected" if is_connected else "disconnected"
-			if not is_connected:
-				next_player["is_ready"] = false
 		updated_players.append(next_player)
 
 	next_state["players"] = updated_players
+	if current_phase == PHASE_PLAYING:
+		next_state["phase"] = PHASE_PLAYING
+		return next_state
+
 	next_state["phase"] = _resolve_phase(updated_players)
 	if str(next_state.get("phase", PHASE_WAITING)) != PHASE_ALL_READY:
 		next_state["transition_countdown"] = 0
@@ -110,8 +113,6 @@ static func _resolve_phase(players: Array) -> String:
 
 	for player_variant in players:
 		var player := player_variant as Dictionary
-		if not bool(player.get("is_connected", true)):
-			return PHASE_WAITING
 		if not bool(player.get("is_ready", false)):
 			return PHASE_WAITING
 
