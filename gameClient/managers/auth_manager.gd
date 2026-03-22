@@ -26,7 +26,6 @@ func _ready() -> void:
 	if not ClientRpc.auth_result_received.is_connected(_on_game_server_auth_result):
 		ClientRpc.auth_result_received.connect(_on_game_server_auth_result)
 	_log_client_network_config()
-	call_deferred("_restore_saved_session")
 
 func login(email: String, password: String) -> Dictionary:
 	return await _authenticate_and_connect("login", email, password)
@@ -71,7 +70,6 @@ func _authenticate_and_connect(action: String, email: String, password: String) 
 		str(connect_result.get("username", auth_username)),
 		auth_token,
 	)
-	LocalStore.set_saved_auth_session(auth_username, auth_token)
 	_logout_disconnect_expected = false
 	authenticated.emit(auth_username)
 	_is_busy = false
@@ -164,49 +162,12 @@ func prepare_for_logout_disconnect() -> void:
 func clear_auth_data() -> void:
 	_logout_disconnect_expected = false
 	_reconnect_in_progress = false
-	LocalStore.clear_saved_auth_session()
 	_set_auth_data("unauthenticated", "", "")
 
 func _set_auth_data(status: String, username: String, token: String) -> void:
 	auth_status = status
 	auth_username = username
 	auth_token = token
-
-func _restore_saved_session() -> void:
-	if _is_busy:
-		return
-	if not auth_token.is_empty():
-		return
-
-	var saved_token := LocalStore.saved_auth_token.strip_edges()
-	if saved_token.is_empty():
-		return
-
-	_is_busy = true
-	_set_auth_data(
-		"authenticating",
-		LocalStore.saved_auth_username.strip_edges(),
-		saved_token,
-	)
-
-	var connect_result := await _connect_to_game_server()
-	if not bool(connect_result.get("ok", false)):
-		_is_busy = false
-		if _is_fatal_reconnect_error(str(connect_result.get("error", ""))):
-			clear_auth_data()
-		else:
-			_set_auth_data("unauthenticated", "", "")
-		return
-
-	_set_auth_data(
-		"authenticated",
-		str(connect_result.get("username", auth_username)),
-		auth_token,
-	)
-	LocalStore.set_saved_auth_session(auth_username, auth_token)
-	_logout_disconnect_expected = false
-	_is_busy = false
-	authenticated.emit(auth_username)
 
 func _run_reconnect_loop() -> void:
 	if _reconnect_in_progress:
